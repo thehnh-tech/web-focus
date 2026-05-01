@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { DELIVERY_FEE, formatPrice } from "@/lib/products";
+import { DELIVERY_FEE, formatColor, formatPrice } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
 export function CartView() {
@@ -14,10 +14,10 @@ export function CartView() {
     return (
       <section className="cart-page container">
         <div className="cart-empty">
-          <h1>Your Cart</h1>
-          <p>Your cart is currently empty.</p>
+          <h1>Votre panier</h1>
+          <p>Votre panier est actuellement vide.</p>
           <Link className="btn-primary" href="/shop">
-            Continue Shopping
+            Continuer mes achats
           </Link>
         </div>
       </section>
@@ -26,7 +26,7 @@ export function CartView() {
 
   return (
     <section className="cart-page container">
-      <h1>Your Cart</h1>
+      <h1>Votre panier</h1>
       <div className="cart-layout">
         <div className="cart-items">
           {items.map((item) => {
@@ -37,14 +37,14 @@ export function CartView() {
                 <div className="cart-item-info">
                   <Link href={`/products/${item.slug}`}>{item.name}</Link>
                   <span>
-                    {item.color} / {item.size}
+                    {formatColor(item.color)} / {item.size}
                   </span>
                   <strong>{formatPrice(item.price)}</strong>
                 </div>
                 <div className="cart-item-actions">
                   <div className="quantity-selector">
                     <button
-                      aria-label="Decrease quantity"
+                      aria-label="Réduire la quantité"
                       onClick={() => updateQuantity(key, item.quantity - 1)}
                       type="button"
                     >
@@ -52,7 +52,7 @@ export function CartView() {
                     </button>
                     <span>{item.quantity}</span>
                     <button
-                      aria-label="Increase quantity"
+                      aria-label="Augmenter la quantité"
                       onClick={() => updateQuantity(key, item.quantity + 1)}
                       type="button"
                     >
@@ -60,7 +60,7 @@ export function CartView() {
                     </button>
                   </div>
                   <button
-                    aria-label="Remove item"
+                    aria-label="Supprimer le produit"
                     className="remove-item"
                     onClick={() => removeItem(key)}
                     type="button"
@@ -74,13 +74,13 @@ export function CartView() {
         </div>
 
         <aside className="order-summary">
-          <h2>Order Summary</h2>
+          <h2>Résumé de commande</h2>
           <div>
-            <span>Subtotal</span>
+            <span>Sous-total</span>
             <strong>{formatPrice(subtotal)}</strong>
           </div>
           <div>
-            <span>Delivery</span>
+            <span>Livraison</span>
             <strong>{formatPrice(DELIVERY_FEE)}</strong>
           </div>
           <div className="summary-total">
@@ -88,9 +88,9 @@ export function CartView() {
             <strong>{formatPrice(total)}</strong>
           </div>
           <Link className="btn-primary" href="/checkout">
-            Checkout
+            Commander
           </Link>
-          <p>Shipping and taxes calculated at checkout.</p>
+          <p>Livraison confirmée au moment de la commande.</p>
         </aside>
       </div>
     </section>

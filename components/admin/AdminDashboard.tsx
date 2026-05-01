@@ -53,6 +53,19 @@ const emptyForm: OfferForm = {
 
 const statuses: Order["status"][] = ["new", "confirmed", "delivered", "cancelled"];
 
+const statusLabels: Record<Order["status"], string> = {
+  new: "Nouvelle",
+  confirmed: "Confirmée",
+  delivered: "Livrée",
+  cancelled: "Annulée"
+};
+
+const categoryLabels: Record<ProductCategory, string> = {
+  "Compression Tops": "Compression",
+  Sets: "Packs",
+  Accessories: "Accessoires"
+};
+
 function productToForm(product: Product): OfferForm {
   return {
     id: product.id,
@@ -70,6 +83,18 @@ function productToForm(product: Product): OfferForm {
   };
 }
 
+function formatOrderDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Date indisponible";
+  }
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(date);
+}
+
 export function AdminDashboard() {
   const router = useRouter();
   const [offers, setOffers] = useState<Product[]>(fallbackProducts);
@@ -78,10 +103,12 @@ export function AdminDashboard() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const isEditing = Boolean(form.id);
 
   async function loadData() {
+    setIsRefreshing(true);
     const [offersResponse, ordersResponse] = await Promise.all([
       fetch("/api/offers", { cache: "no-store" }),
       fetch("/api/orders", { cache: "no-store" })
@@ -100,10 +127,15 @@ export function AdminDashboard() {
         setOrders(data.orders);
       }
     }
+
+    setIsRefreshing(false);
   }
 
   useEffect(() => {
-    loadData().catch(() => setError("Unable to load admin data."));
+    loadData().catch(() => {
+      setError("Impossible de charger les données admin.");
+      setIsRefreshing(false);
+    });
   }, []);
 
   const stats = useMemo(() => {
@@ -142,11 +174,11 @@ export function AdminDashboard() {
     setIsSaving(false);
 
     if (!response.ok) {
-      setError(data?.error || "Unable to save offer.");
+      setError(data?.error || "Impossible d’enregistrer l’offre.");
       return;
     }
 
-    setMessage(isEditing ? "Offer updated." : "Offer created.");
+    setMessage(isEditing ? "Offre mise à jour." : "Offre créée.");
     setForm(emptyForm);
     await loadData();
   }
@@ -156,11 +188,11 @@ export function AdminDashboard() {
 
     if (!response.ok) {
       const data = await response.json().catch(() => null);
-      setError(data?.error || "Unable to delete offer.");
+      setError(data?.error || "Impossible de supprimer l’offre.");
       return;
     }
 
-    setMessage("Offer deleted.");
+    setMessage("Offre supprimée.");
     await loadData();
   }
 
@@ -188,25 +220,25 @@ export function AdminDashboard() {
     <section className="admin-page container">
       <div className="admin-topbar">
         <div>
-          <span className="section-eyebrow">Dashboard</span>
+          <span className="section-eyebrow">Tableau de bord</span>
           <h1>FOCUS Admin</h1>
         </div>
         <button className="btn-secondary" onClick={logout} type="button">
-          Logout
+          Déconnexion
         </button>
       </div>
 
       <div className="admin-stats">
         <article>
-          <span>Orders</span>
+          <span>Commandes</span>
           <strong>{stats.orders}</strong>
         </article>
         <article>
-          <span>New Orders</span>
+          <span>Nouvelles</span>
           <strong>{stats.newOrders}</strong>
         </article>
         <article>
-          <span>Revenue</span>
+          <span>Chiffre d’affaires</span>
           <strong>{formatPrice(stats.revenue)}</strong>
         </article>
       </div>
@@ -214,21 +246,95 @@ export function AdminDashboard() {
       {message ? <p className="form-success">{message}</p> : null}
       {error ? <p className="form-error">{error}</p> : null}
 
+      <div className="admin-panel admin-orders-panel">
+        <div className="admin-section-head">
+          <div>
+            <h2>Bons de commande</h2>
+            <p>Les commandes les plus récentes apparaissent en premier.</p>
+          </div>
+          <button className="btn-secondary" disabled={isRefreshing} onClick={loadData} type="button">
+            {isRefreshing ? "Actualisation..." : "Actualiser"}
+          </button>
+        </div>
+
+        {orders.length > 0 ? (
+          <div className="admin-orders-grid">
+            {orders.map((order) => (
+              <article className="admin-order-card" key={order.id}>
+                <header>
+                  <div>
+                    <strong>Commande #{order.id.slice(-6).toUpperCase()}</strong>
+                    <span>{formatOrderDate(order.createdAt)}</span>
+                  </div>
+                  <select
+                    aria-label="Statut de commande"
+                    onChange={(event) =>
+                      updateOrderStatus(order, event.target.value as Order["status"])
+                    }
+                    value={order.status}
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {statusLabels[status]}
+                      </option>
+                    ))}
+                  </select>
+                </header>
+
+                <div className="admin-order-main">
+                  <div>
+                    <span>Client</span>
+                    <strong>{order.fullName}</strong>
+                    <a href={`tel:${order.phone}`}>{order.phone}</a>
+                    <a href={`mailto:${order.email}`}>{order.email}</a>
+                  </div>
+                  <div>
+                    <span>Livraison</span>
+                    <strong>{order.city}</strong>
+                    <p>{order.address}</p>
+                    <p>Taille demandée : {order.size}</p>
+                  </div>
+                </div>
+
+                <div className="admin-order-items">
+                  <span>Articles</span>
+                  {order.items.map((item) => (
+                    <p key={`${order.id}-${item.name}-${item.size}`}>
+                      {item.name} x {item.quantity} / {item.size}
+                    </p>
+                  ))}
+                </div>
+
+                <footer>
+                  <span>Livraison : {formatPrice(Number(order.deliveryFee || 0))}</span>
+                  <strong>Total : {formatPrice(Number(order.total || 0))}</strong>
+                </footer>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="admin-empty-orders">
+            <strong>Aucune commande pour le moment.</strong>
+            <span>Les nouveaux bons de commande apparaîtront ici.</span>
+          </div>
+        )}
+      </div>
+
       <div className="admin-layout">
         <form className="admin-panel" onSubmit={handleSubmit}>
-          <h2>{isEditing ? "Edit Offer" : "Add Offer"}</h2>
+          <h2>{isEditing ? "Modifier l’offre" : "Ajouter une offre"}</h2>
           <div className="admin-form-grid">
             <input
               className="admin-input"
               onChange={(event) => updateForm("name", event.target.value)}
-              placeholder="Product name"
+              placeholder="Nom du produit"
               required
               value={form.name}
             />
             <input
               className="admin-input"
               onChange={(event) => updateForm("slug", event.target.value)}
-              placeholder="product-slug"
+              placeholder="slug-produit"
               required
               value={form.slug}
             />
@@ -236,7 +342,7 @@ export function AdminDashboard() {
               className="admin-input"
               min="0"
               onChange={(event) => updateForm("price", event.target.value)}
-              placeholder="Price"
+              placeholder="Prix"
               required
               step="0.1"
               type="number"
@@ -246,7 +352,7 @@ export function AdminDashboard() {
               className="admin-input"
               min="0"
               onChange={(event) => updateForm("oldPrice", event.target.value)}
-              placeholder="Old price"
+              placeholder="Ancien prix"
               step="0.1"
               type="number"
               value={form.oldPrice}
@@ -256,14 +362,14 @@ export function AdminDashboard() {
               onChange={(event) => updateForm("category", event.target.value as ProductCategory)}
               value={form.category}
             >
-              <option>Compression Tops</option>
-              <option>Sets</option>
-              <option>Accessories</option>
+              <option value="Compression Tops">Compression</option>
+              <option value="Sets">Packs</option>
+              <option value="Accessories">Accessoires</option>
             </select>
             <input
               className="admin-input"
               onChange={(event) => updateForm("color", event.target.value)}
-              placeholder="Color"
+              placeholder="Couleur"
               value={form.color}
             />
             <input
@@ -282,7 +388,7 @@ export function AdminDashboard() {
             <input
               className="admin-input"
               onChange={(event) => updateForm("alt", event.target.value)}
-              placeholder="Alt text"
+              placeholder="Texte alternatif"
               required
               value={form.alt}
             />
@@ -292,7 +398,7 @@ export function AdminDashboard() {
                 onChange={(event) => updateForm("featured", event.target.checked)}
                 type="checkbox"
               />
-              Featured
+              Produit mis en avant
             </label>
             <textarea
               className="admin-input textarea admin-full"
@@ -304,18 +410,18 @@ export function AdminDashboard() {
           </div>
           <div className="admin-actions">
             <button className="buy-button" disabled={isSaving} type="submit">
-              {isSaving ? "Saving..." : isEditing ? "Update Offer" : "Add Offer"}
+              {isSaving ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Ajouter l’offre"}
             </button>
             {isEditing ? (
               <button className="btn-secondary" onClick={() => setForm(emptyForm)} type="button">
-                Cancel
+                Annuler
               </button>
             ) : null}
           </div>
         </form>
 
         <div className="admin-panel">
-          <h2>Offers</h2>
+          <h2>Offres</h2>
           <div className="admin-offers-list">
             {offers.map((product) => (
               <article className="admin-offer-row" key={product.id}>
@@ -323,77 +429,18 @@ export function AdminDashboard() {
                 <div>
                   <strong>{product.name}</strong>
                   <span>
-                    {product.category} / {formatPrice(product.price)}
+                    {categoryLabels[product.category]} / {formatPrice(product.price)}
                   </span>
                 </div>
                 <button onClick={() => setForm(productToForm(product))} type="button">
-                  Edit
+                  Modifier
                 </button>
                 <button onClick={() => deleteOffer(product)} type="button">
-                  Delete
+                  Supprimer
                 </button>
               </article>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="admin-panel">
-        <h2>Orders</h2>
-        <div className="orders-table-wrap">
-          <table className="orders-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Delivery</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.length > 0 ? (
-                orders.map((order) => (
-                  <tr key={order.id}>
-                    <td>
-                      <strong>{order.fullName}</strong>
-                      <span>{order.phone}</span>
-                      <span>{order.email}</span>
-                    </td>
-                    <td>
-                      <span>{order.city}</span>
-                      <span>{order.address}</span>
-                      <span>Size: {order.size}</span>
-                    </td>
-                    <td>
-                      {order.items.map((item) => (
-                        <span key={`${order.id}-${item.name}-${item.size}`}>
-                          {item.name} x {item.quantity}
-                        </span>
-                      ))}
-                    </td>
-                    <td>{formatPrice(Number(order.total))}</td>
-                    <td>
-                      <select
-                        onChange={(event) =>
-                          updateOrderStatus(order, event.target.value as Order["status"])
-                        }
-                        value={order.status}
-                      >
-                        {statuses.map((status) => (
-                          <option key={status}>{status}</option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5}>No orders yet.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
       </div>
     </section>

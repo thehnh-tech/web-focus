@@ -14,7 +14,7 @@ export function ContactForm() {
       }}
     >
       <div className="field">
-        <label htmlFor="contact-name">Full Name</label>
+        <label htmlFor="contact-name">Nom complet</label>
         <input id="contact-name" required />
       </div>
       <div className="field">
@@ -22,7 +22,7 @@ export function ContactForm() {
         <input id="contact-email" required type="email" />
       </div>
       <div className="field">
-        <label htmlFor="contact-phone">Phone Number</label>
+        <label htmlFor="contact-phone">Téléphone</label>
         <input id="contact-phone" required type="tel" />
       </div>
       <div className="field">
@@ -31,11 +31,11 @@ export function ContactForm() {
       </div>
       {sent ? (
         <p className="form-success">
-          Message ready. Contact FOCUS directly by email or WhatsApp for now.
+          Message prêt. Contactez FOCUS directement par email ou WhatsApp pour le moment.
         </p>
       ) : null}
       <button className="buy-button" type="submit">
-        Send Message
+        Envoyer
       </button>
     </form>
   );

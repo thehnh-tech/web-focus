@@ -46,19 +46,19 @@ export function validateOfferPayload(body: Record<string, unknown>) {
   const slug = String(body.slug ?? slugify(name)).trim();
 
   if (!name || !slug || !Number.isFinite(price) || price <= 0) {
-    return { error: "Name, slug and a valid price are required." };
+    return { error: "Le nom, le slug et un prix valide sont obligatoires." };
   }
 
   if (!productCategories.includes(category)) {
-    return { error: "Invalid product category." };
+    return { error: "Catégorie produit invalide." };
   }
 
   if (!image || !description) {
-    return { error: "Image and description are required." };
+    return { error: "L’image et la description sont obligatoires." };
   }
 
   if (oldPrice !== undefined && (!Number.isFinite(oldPrice) || oldPrice <= 0)) {
-    return { error: "Old price must be a valid number." };
+    return { error: "L’ancien prix doit être un nombre valide." };
   }
 
   return {
@@ -88,23 +88,23 @@ export function validateOrderPayload(body: Record<string, unknown>) {
   const rawItems = Array.isArray(body.items) ? body.items : [];
 
   if (!fullName || !phone || !city || !address || !email || !size) {
-    return { error: "All order fields are required." };
+    return { error: "Tous les champs de commande sont obligatoires." };
   }
 
   if (!governorates.includes(city as (typeof governorates)[number])) {
-    return { error: "Invalid city." };
+    return { error: "Ville invalide." };
   }
 
   if (!orderSizes.includes(size as (typeof orderSizes)[number])) {
-    return { error: "Invalid size." };
+    return { error: "Taille invalide." };
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { error: "Invalid email." };
+    return { error: "Email invalide." };
   }
 
   if (rawItems.length === 0) {
-    return { error: "Your cart is empty." };
+    return { error: "Votre panier est vide." };
   }
 
   const items = rawItems.map((item) => {
@@ -135,7 +135,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
         item.quantity < 1
     )
   ) {
-    return { error: "Invalid cart item." };
+    return { error: "Produit invalide dans le panier." };
   }
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -153,7 +153,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
       subtotal,
       deliveryFee,
       total: subtotal + deliveryFee,
-      paymentMethod: "Cash on Delivery"
+      paymentMethod: "Paiement à la livraison"
     }
   };
 }

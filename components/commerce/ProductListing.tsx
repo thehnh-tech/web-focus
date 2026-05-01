@@ -16,6 +16,20 @@ const sorts: SortMode[] = [
   "Newest"
 ];
 
+const filterLabels: Record<FilterMode, string> = {
+  All: "Tous",
+  "Compression Tops": "Compression",
+  Sets: "Packs",
+  Accessories: "Accessoires"
+};
+
+const sortLabels: Record<SortMode, string> = {
+  Featured: "Sélection",
+  "Price: Low to High": "Prix croissant",
+  "Price: High to Low": "Prix décroissant",
+  Newest: "Nouveautés"
+};
+
 export function ProductListing({
   initialCategory = "All",
   compactFilters = false
@@ -66,7 +80,7 @@ export function ProductListing({
     <section className="products-section">
       <div className="container">
         <div className="filter-bar">
-          <div className="filter-tabs" aria-label="Product filters">
+          <div className="filter-tabs" aria-label="Filtres produits">
             {availableFilters.map((filter) => (
               <button
                 className={activeFilter === filter ? "active" : ""}
@@ -74,15 +88,17 @@ export function ProductListing({
                 onClick={() => setActiveFilter(filter)}
                 type="button"
               >
-                {filter}
+                {filterLabels[filter]}
               </button>
             ))}
           </div>
           <label className="sort-select">
-            <span>Sort</span>
+            <span>Trier</span>
             <select value={sort} onChange={(event) => setSort(event.target.value as SortMode)}>
               {sorts.map((sortOption) => (
-                <option key={sortOption}>{sortOption}</option>
+                <option key={sortOption} value={sortOption}>
+                  {sortLabels[sortOption]}
+                </option>
               ))}
             </select>
           </label>
@@ -96,8 +112,8 @@ export function ProductListing({
           </div>
         ) : (
           <div className="empty-state">
-            <h2>No products found.</h2>
-            <p>Try another filter or check back soon.</p>
+            <h2>Aucun produit trouvé.</h2>
+            <p>Essayez un autre filtre ou revenez bientôt.</p>
           </div>
         )}
       </div>

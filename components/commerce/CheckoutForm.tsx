@@ -52,29 +52,29 @@ export function CheckoutForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || "Unable to place order.");
+        throw new Error(data?.error || "Impossible de valider la commande.");
       }
 
       setStatus("success");
       setMessage(
-        "Order confirmed. Thank you for your order. We will contact you shortly to confirm delivery."
+        "Commande confirmée. Merci pour votre commande. Nous vous contacterons rapidement pour confirmer la livraison."
       );
       clearCart();
       setForm(initialForm);
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Unable to place order.");
+      setMessage(error instanceof Error ? error.message : "Impossible de valider la commande.");
     }
   }
 
   return (
     <section className="checkout-page container">
       <div>
-        <span className="section-eyebrow">Checkout</span>
-        <h1>Place Order</h1>
+        <span className="section-eyebrow">Commande</span>
+        <h1>Finaliser</h1>
         <p>
-          Cash on delivery is prioritized for Tunisia. Delivery costs 7 DT and
-          will be confirmed by our team.
+          Le paiement à la livraison est disponible partout en Tunisie. La
+          livraison coûte 7 DT et sera confirmée par notre équipe.
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export function CheckoutForm() {
             <h2>Contact</h2>
             <div className="form-grid two-cols">
               <div className="field">
-                <label htmlFor="fullName">Full Name</label>
+                <label htmlFor="fullName">Nom complet</label>
                 <input
                   id="fullName"
                   minLength={2}
@@ -94,7 +94,7 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="phone">Phone Number</label>
+                <label htmlFor="phone">Téléphone</label>
                 <input
                   id="phone"
                   onChange={(event) => updateField("phone", event.target.value)}
@@ -114,7 +114,7 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="size">Size</label>
+                <label htmlFor="size">Taille</label>
                 <select
                   id="size"
                   onChange={(event) => updateField("size", event.target.value)}
@@ -130,10 +130,10 @@ export function CheckoutForm() {
           </div>
 
           <div className="checkout-step">
-            <h2>Delivery</h2>
+            <h2>Livraison</h2>
             <div className="form-grid two-cols">
               <div className="field">
-                <label htmlFor="city">City</label>
+                <label htmlFor="city">Ville</label>
                 <select
                   id="city"
                   onChange={(event) => updateField("city", event.target.value)}
@@ -146,7 +146,7 @@ export function CheckoutForm() {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="address">Address</label>
+                <label htmlFor="address">Adresse</label>
                 <input
                   id="address"
                   onChange={(event) => updateField("address", event.target.value)}
@@ -158,12 +158,12 @@ export function CheckoutForm() {
           </div>
 
           <div className="checkout-step">
-            <h2>Payment</h2>
+            <h2>Paiement</h2>
             <label className="payment-method">
               <input checked readOnly type="radio" />
               <span>
-                <strong>Cash on Delivery</strong>
-                <small>Pay when your order arrives.</small>
+                <strong>Paiement à la livraison</strong>
+                <small>Payez lorsque votre commande arrive.</small>
               </span>
             </label>
           </div>
@@ -173,12 +173,12 @@ export function CheckoutForm() {
           ) : null}
 
           <button className="buy-button" disabled={status === "loading"} type="submit">
-            {status === "loading" ? "Placing Order..." : "Place Order"}
+            {status === "loading" ? "Validation..." : "Valider la commande"}
           </button>
         </form>
 
         <aside className="order-summary">
-          <h2>Review</h2>
+          <h2>Résumé</h2>
           {items.length > 0 ? (
             items.map((item) => (
               <div key={`${item.productId}-${item.size}-${item.color}`}>
@@ -189,14 +189,14 @@ export function CheckoutForm() {
               </div>
             ))
           ) : (
-            <p>Your cart is currently empty.</p>
+            <p>Votre panier est actuellement vide.</p>
           )}
           <div>
-            <span>Subtotal</span>
+            <span>Sous-total</span>
             <strong>{formatPrice(subtotal)}</strong>
           </div>
           <div>
-            <span>Delivery</span>
+            <span>Livraison</span>
             <strong>{items.length > 0 ? formatPrice(DELIVERY_FEE) : formatPrice(0)}</strong>
           </div>
           <div className="summary-total">
@@ -204,7 +204,7 @@ export function CheckoutForm() {
             <strong>{formatPrice(total)}</strong>
           </div>
           <Link className="btn-secondary" href="/cart">
-            Edit Cart
+            Modifier le panier
           </Link>
         </aside>
       </div>

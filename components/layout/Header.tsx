@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 
 const navLinks = [
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
+  { href: "/shop", label: "Boutique" },
+  { href: "/about", label: "A propos" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -45,7 +45,7 @@ export function Header() {
 
         <button
           aria-expanded={isOpen}
-          aria-label="Open menu"
+          aria-label="Ouvrir le menu"
           className="icon-button mobile-menu-trigger"
           onClick={() => setIsOpen(true)}
           type="button"
@@ -65,13 +65,13 @@ export function Header() {
         </Link>
 
         <div className="header-actions">
-          <button className="icon-button desktop-icon" aria-label="Search" type="button">
+          <button className="icon-button desktop-icon" aria-label="Recherche" type="button">
             <Search aria-hidden="true" />
           </button>
-          <Link className="icon-button desktop-icon" href="/admin/login" aria-label="Account">
+          <Link className="icon-button desktop-icon" href="/admin/login" aria-label="Compte">
             <User aria-hidden="true" />
           </Link>
-          <Link className="icon-button cart-icon" href="/cart" aria-label="Cart">
+          <Link className="icon-button cart-icon" href="/cart" aria-label="Panier">
             <ShoppingBag aria-hidden="true" />
             {count > 0 ? <span className="cart-badge">{count}</span> : null}
           </Link>
@@ -82,7 +82,7 @@ export function Header() {
         <div className="mobile-menu-head">
           <Image alt="FOCUS logo" height={48} src="/images/logo.png" width={48} />
           <button
-            aria-label="Close menu"
+            aria-label="Fermer le menu"
             className="icon-button"
             onClick={() => setIsOpen(false)}
             type="button"
@@ -116,7 +116,7 @@ export function Header() {
             onClick={() => setIsOpen(false)}
             style={{ transitionDelay: isOpen ? "275ms" : "0ms" }}
           >
-            Account
+            Compte
           </Link>
         </nav>
       </div>

@@ -8,22 +8,22 @@ import { Header } from "@/components/layout/Header";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "FOCUS | Compression Wear for Training",
+    default: "FOCUS | Vêtements de compression pour l’entraînement",
     template: "%s | FOCUS"
   },
   description:
-    "Discover FOCUS compression wear. Premium athletic tops built for training, performance and everyday focus.",
+    "Découvrez FOCUS, des vêtements de compression premium conçus pour l’entraînement, la performance et la discipline.",
   openGraph: {
-    title: "FOCUS | Compression Wear for Training",
+    title: "FOCUS | Vêtements de compression pour l’entraînement",
     description:
-      "Premium athletic compression tops built for training, performance and everyday focus.",
+      "T-shirts de compression premium conçus pour l’entraînement, la performance et la discipline.",
     images: ["/images/packhero.png"]
   }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body>
         <AppProviders>
           <AnnouncementBar />

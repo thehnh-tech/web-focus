@@ -1,38 +1,38 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "FOCUS terms of service."
+  title: "Conditions générales de vente",
+  description: "Conditions générales de vente FOCUS."
 };
 
 const terms = [
   {
-    title: "Orders",
-    text: "Orders are confirmed after the customer submits complete contact and delivery information."
+    title: "Commandes",
+    text: "Les commandes sont confirmées après réception des informations complètes de contact et de livraison."
   },
   {
-    title: "Pricing",
-    text: "Prices are displayed in DT. Promotional prices may change according to availability."
+    title: "Prix",
+    text: "Les prix sont affichés en DT. Les prix promotionnels peuvent évoluer selon la disponibilité."
   },
   {
-    title: "Payment",
-    text: "Cash on delivery is available. Other payment methods may be added later."
+    title: "Paiement",
+    text: "Le paiement à la livraison est disponible. D’autres moyens de paiement pourront être ajoutés."
   },
   {
-    title: "Delivery",
-    text: "Delivery is available in Tunisia. Delivery timing depends on the customer city."
+    title: "Livraison",
+    text: "La livraison est disponible en Tunisie. Le délai dépend de la ville du client."
   },
   {
-    title: "Returns",
-    text: "Returns and exchanges are handled according to store policy and require items to be unworn and in original condition."
+    title: "Retours",
+    text: "Les retours et échanges sont traités selon la politique de la boutique. Les articles doivent être non portés et en état d’origine."
   },
   {
-    title: "Product Availability",
-    text: "Products and sizes are subject to stock availability."
+    title: "Disponibilité",
+    text: "Les produits et tailles sont soumis aux stocks disponibles."
   },
   {
     title: "Contact",
-    text: "For support, contact hello@focuswear.com."
+    text: "Pour toute demande, contactez hello@focuswear.com."
   }
 ];
 
@@ -40,8 +40,8 @@ export default function TermsPage() {
   return (
     <section className="content-page container narrow">
       <div className="content-hero">
-        <span className="section-eyebrow">Legal</span>
-        <h1>Terms of Service</h1>
+        <span className="section-eyebrow">Légal</span>
+        <h1>Conditions générales de vente</h1>
       </div>
       <div className="policy-list">
         {terms.map((item) => (
@@ -51,7 +51,7 @@ export default function TermsPage() {
           </article>
         ))}
       </div>
-      <p className="note">This legal text is a starter template and should be validated.</p>
+      <p className="note">Ce texte légal est un modèle de départ et doit être validé.</p>
     </section>
   );
 }

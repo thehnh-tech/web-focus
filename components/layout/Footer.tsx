@@ -1,31 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Facebook, Send } from "lucide-react";
+import { Facebook, Instagram, Music2 } from "lucide-react";
 
 const footerColumns = [
   {
-    title: "Shop",
+    title: "Boutique",
     links: [
-      { href: "/shop", label: "All Products" },
-      { href: "/shop", label: "Compression Tops" },
-      { href: "/size-guide", label: "Size Guide" }
+      { href: "/shop", label: "Tous les produits" },
+      { href: "/shop", label: "T-shirts de compression" },
+      { href: "/size-guide", label: "Guide des tailles" }
     ]
   },
   {
-    title: "About",
+    title: "Marque",
     links: [
-      { href: "/about", label: "Our Story" },
-      { href: "/about", label: "Materials" },
+      { href: "/about", label: "Notre histoire" },
+      { href: "/about", label: "Matières" },
       { href: "/contact", label: "Contact" }
     ]
   },
   {
     title: "Support",
     links: [
-      { href: "/shipping-returns", label: "Shipping & Delivery" },
-      { href: "/shipping-returns", label: "Returns & Exchanges" },
+      { href: "/shipping-returns", label: "Livraison" },
+      { href: "/shipping-returns", label: "Retours et échanges" },
       { href: "/faq", label: "FAQs" },
-      { href: "/size-guide", label: "Size Guide" }
+      { href: "/size-guide", label: "Guide des tailles" }
     ]
   }
 ];
@@ -36,16 +36,19 @@ export function Footer() {
       <div className="container footer-grid">
         <div className="footer-brand">
           <Image alt="FOCUS logo" height={56} src="/images/logo.png" width={56} />
-          <p>Engineered compression wear for those who train with focus.</p>
+          <p>Vêtements de compression conçus pour ceux qui s’entraînent avec discipline.</p>
           <div className="social-links" aria-label="Social links">
-            <a href="https://instagram.com" aria-label="Instagram">
+            <a href="https://www.instagram.com/focusgym.tn/" aria-label="Instagram">
               <Instagram aria-hidden="true" />
             </a>
-            <a href="https://facebook.com" aria-label="Facebook">
+            <a
+              href="https://www.facebook.com/profile.php?id=61585161253025"
+              aria-label="Facebook"
+            >
               <Facebook aria-hidden="true" />
             </a>
-            <a href="https://wa.me/21654254597" aria-label="WhatsApp">
-              <Send aria-hidden="true" />
+            <a href="https://www.tiktok.com/@focusgym_tn" aria-label="TikTok">
+              <Music2 aria-hidden="true" />
             </a>
           </div>
         </div>
@@ -69,10 +72,10 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© 2025 FOCUS. All rights reserved.</span>
+        <span>© 2025 FOCUS. Tous droits réservés.</span>
         <div>
-          <Link href="/terms">Terms</Link>
-          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">CGV</Link>
+          <Link href="/privacy">Confidentialité</Link>
         </div>
       </div>
     </footer>

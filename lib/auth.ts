@@ -2,7 +2,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "focus_admin_session";
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+const SESSION_TTL_SECONDS = 60 * 60 * 24;
+const REMEMBER_SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
 function getSecret() {
   return process.env.ADMIN_SESSION_SECRET || "focus-dev-session-secret";
@@ -19,11 +20,11 @@ export function getAdminCredentials() {
   };
 }
 
-export function createAdminToken() {
+export function createAdminToken(maxAge = SESSION_TTL_SECONDS) {
   const payload = Buffer.from(
     JSON.stringify({
       sub: "admin",
-      exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS
+      exp: Math.floor(Date.now() / 1000) + maxAge
     })
   ).toString("base64url");
 
@@ -64,14 +65,14 @@ export async function isAdminAuthenticated() {
   return verifyAdminToken(cookieStore.get(COOKIE_NAME)?.value);
 }
 
-export async function setAdminCookie(token: string) {
+export async function setAdminCookie(token: string, maxAge = SESSION_TTL_SECONDS) {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: SESSION_TTL_SECONDS
+    maxAge
   });
 }
 
@@ -86,4 +87,4 @@ export async function clearAdminCookie() {
   });
 }
 
-export { COOKIE_NAME };
+export { COOKIE_NAME, REMEMBER_SESSION_TTL_SECONDS, SESSION_TTL_SECONDS };

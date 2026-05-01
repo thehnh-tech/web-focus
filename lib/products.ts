@@ -36,52 +36,62 @@ export const fallbackProducts: Product[] = [
   {
     id: "focus-compression-short-sleeve-black",
     slug: "focus-compression-short-sleeve-black",
-    name: "Focus Compression Short Sleeve - Black",
+    name: "T-shirt de compression FOCUS - Noir",
     price: 64.9,
     oldPrice: 89.9,
     category: "Compression Tops",
     image: "/images/black-front.png",
     secondaryImage: "/images/black-back.png",
-    alt: "Black FOCUS compression short sleeve top",
+    alt: "T-shirt de compression FOCUS noir",
     color: "Black",
     description:
-      "A high-performance compression top with a second-skin fit, breathable feel and clean FOCUS identity.",
+      "Un t-shirt de compression performant avec une coupe seconde peau, une sensation respirante et une identité FOCUS épurée.",
     featured: true
   },
   {
     id: "focus-compression-short-sleeve-white",
     slug: "focus-compression-short-sleeve-white",
-    name: "Focus Compression Short Sleeve - White",
+    name: "T-shirt de compression FOCUS - Blanc",
     price: 64.9,
     oldPrice: 89.9,
     category: "Compression Tops",
     image: "/images/white-front.png",
     secondaryImage: "/images/white-back.png",
-    alt: "White FOCUS compression short sleeve top",
+    alt: "T-shirt de compression FOCUS blanc",
     color: "White",
     description:
-      "A clean white compression top made for training, movement and everyday focus.",
+      "Un t-shirt de compression blanc, propre et léger, conçu pour l’entraînement, le mouvement et la concentration.",
     featured: true
   },
   {
     id: "focus-compression-tops-pack-2-pack",
     slug: "focus-compression-tops-pack-2-pack",
-    name: "Focus Compression Tops Pack - 2 Pack",
+    name: "Pack compression FOCUS - Noir & Blanc",
     price: 124.9,
     oldPrice: 169.9,
     category: "Sets",
     image: "/images/pack-front.png",
     secondaryImage: "/images/pack-back.png",
-    alt: "Black and white FOCUS compression tops pack",
+    alt: "Pack de t-shirts de compression FOCUS noir et blanc",
     color: "Black & White",
     description:
-      "A black and white compression tops pack built for daily training rotation.",
+      "Un pack noir et blanc pensé pour alterner facilement entre les séances d’entraînement.",
     featured: true
   }
 ];
 
 export function formatPrice(value: number) {
   return `${value.toFixed(1)} DT`;
+}
+
+export function formatColor(value?: string) {
+  const labels: Record<string, string> = {
+    Black: "Noir",
+    White: "Blanc",
+    "Black & White": "Noir & Blanc"
+  };
+
+  return value ? labels[value] ?? value : "";
 }
 
 export function getProductBySlug(slug: string) {

@@ -1,30 +1,30 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "FOCUS privacy policy."
+  title: "Politique de confidentialité",
+  description: "Politique de confidentialité FOCUS."
 };
 
 const sections = [
   {
-    title: "Information We Collect",
-    text: "We collect the information needed to process your order, including name, phone, email, address, city and selected size."
+    title: "Informations collectées",
+    text: "Nous collectons les informations nécessaires au traitement de votre commande : nom, téléphone, email, adresse, ville et taille choisie."
   },
   {
-    title: "How We Use Information",
-    text: "We use your information to confirm orders, arrange delivery and provide customer support."
+    title: "Utilisation des informations",
+    text: "Nous utilisons vos informations pour confirmer les commandes, organiser la livraison et assurer le support client."
   },
   {
     title: "Cookies",
-    text: "The site may use essential cookies for cart and admin session functionality."
+    text: "Le site peut utiliser des cookies essentiels pour le panier et la session administrateur."
   },
   {
-    title: "Third-Party Services",
-    text: "Hosting, analytics or delivery tools may process limited data needed to operate the store."
+    title: "Services tiers",
+    text: "L’hébergement, les outils d’analyse ou de livraison peuvent traiter certaines données nécessaires au fonctionnement de la boutique."
   },
   {
     title: "Contact",
-    text: "For privacy questions, contact hello@focuswear.com."
+    text: "Pour toute question liée à la confidentialité, contactez hello@focuswear.com."
   }
 ];
 
@@ -32,8 +32,8 @@ export default function PrivacyPage() {
   return (
     <section className="content-page container narrow">
       <div className="content-hero">
-        <span className="section-eyebrow">Legal</span>
-        <h1>Privacy Policy</h1>
+        <span className="section-eyebrow">Légal</span>
+        <h1>Politique de confidentialité</h1>
       </div>
       <div className="policy-list">
         {sections.map((section) => (

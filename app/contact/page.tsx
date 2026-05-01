@@ -4,7 +4,7 @@ import { ContactForm } from "@/components/commerce/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact FOCUS for sizing, delivery or order support."
+  description: "Contactez FOCUS pour une taille, une livraison ou une commande."
 };
 
 export default function ContactPage() {
@@ -12,8 +12,8 @@ export default function ContactPage() {
     <section className="contact-page container">
       <div className="content-hero">
         <span className="section-eyebrow">Support</span>
-        <h1>Contact Us</h1>
-        <p>Need help with sizing, delivery or your order? Send us a message.</p>
+        <h1>Contact</h1>
+        <p>Besoin d’aide pour une taille, une livraison ou une commande ? Écrivez-nous.</p>
       </div>
 
       <div className="contact-layout">
@@ -22,10 +22,10 @@ export default function ContactPage() {
         <aside className="contact-card">
           <h2>Contact</h2>
           <p>Email: hello@focuswear.com</p>
-          <p>Phone: +216 54 254 597</p>
-          <p>Location: Tunis, Tunisia</p>
+          <p>Téléphone : +216 54 254 597</p>
+          <p>Adresse : Tunis, Tunisie</p>
           <Link className="btn-secondary" href="https://wa.me/21654254597">
-            Message on WhatsApp
+            Message WhatsApp
           </Link>
         </aside>
       </div>

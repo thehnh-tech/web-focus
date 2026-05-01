@@ -3,31 +3,31 @@ import { Accordion } from "@/components/ui/Accordion";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Frequently asked questions about FOCUS compression wear."
+  description: "Questions fréquentes sur les vêtements de compression FOCUS."
 };
 
 const faqItems = [
   {
-    title: "What size should I choose?",
+    title: "Quelle taille choisir ?",
     content:
-      "Our compression tops are fitted. Choose your usual size for compression, or size up for a more relaxed fit."
+      "Nos t-shirts de compression sont ajustés. Choisissez votre taille habituelle pour un effet compression, ou une taille au-dessus pour plus d’aisance."
   },
   {
-    title: "Do you deliver in Tunisia?",
-    content: "Yes, delivery is available across Tunisia."
+    title: "Livrez-vous en Tunisie ?",
+    content: "Oui, la livraison est disponible partout en Tunisie."
   },
   {
-    title: "How long does delivery take?",
+    title: "Combien de temps prend la livraison ?",
     content:
-      "Delivery time depends on your city. We will contact you after your order to confirm timing."
+      "Le délai dépend de votre ville. Nous vous contactons après la commande pour confirmer la livraison."
   },
   {
-    title: "Can I exchange my item?",
-    content: "Yes, exchanges are possible according to our return policy."
+    title: "Puis-je échanger mon article ?",
+    content: "Oui, les échanges sont possibles selon notre politique de retour."
   },
   {
-    title: "How should I wash the compression top?",
-    content: "Machine wash cold. Do not bleach. Air dry recommended."
+    title: "Comment laver le t-shirt de compression ?",
+    content: "Lavage à froid. Ne pas utiliser d’eau de Javel. Séchage à l’air libre recommandé."
   }
 ];
 

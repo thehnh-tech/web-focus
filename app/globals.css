@@ -1550,6 +1550,125 @@ tr:last-child td {
   margin-top: 16px;
 }
 
+.admin-orders-panel {
+  margin-bottom: 32px;
+}
+
+.admin-section-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.admin-section-head h2 {
+  margin-bottom: 6px;
+}
+
+.admin-section-head p {
+  color: var(--muted-foreground);
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-orders-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-order-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+}
+
+.admin-order-card header,
+.admin-order-card footer {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.admin-order-card header div,
+.admin-order-card footer {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-order-card header strong {
+  font-size: 15px;
+}
+
+.admin-order-card span,
+.admin-order-card p,
+.admin-order-card a {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  margin: 0;
+}
+
+.admin-order-card a:hover {
+  color: var(--primary);
+}
+
+.admin-order-card select {
+  background: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 0 10px;
+  text-transform: uppercase;
+}
+
+.admin-order-main {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-order-main > div,
+.admin-order-items {
+  background: #fafafa;
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+}
+
+.admin-order-main > div > span,
+.admin-order-items > span {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.admin-order-items p {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.admin-empty-orders {
+  border: 1px dashed #d4d4d4;
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 6px;
+  padding: 28px;
+  text-align: center;
+}
+
+.admin-empty-orders span {
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+
 .admin-offers-list {
   display: grid;
   gap: 12px;
@@ -1803,11 +1922,14 @@ tr:last-child td {
   .content-split,
   .value-grid,
   .admin-stats,
-  .admin-form-grid {
+  .admin-form-grid,
+  .admin-orders-grid,
+  .admin-order-main {
     grid-template-columns: 1fr;
   }
 
   .admin-topbar,
+  .admin-section-head,
   .admin-actions {
     align-items: stretch;
     flex-direction: column;

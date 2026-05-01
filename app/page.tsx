@@ -11,20 +11,20 @@ export default function HomePage() {
         <div className="hero-inner">
           <div>
             <h1 className="hero-title">
-              Engineered
+              Conçu
               <br />
-              for Focus.
+              pour le focus.
             </h1>
             <p className="hero-text">
-              High-performance compression wear built to support every rep,
-              every set, every goal.
+              Des vêtements de compression performants pour accompagner chaque
+              répétition, chaque série, chaque objectif.
             </p>
             <div className="hero-actions">
               <Link className="btn-primary" href="/shop">
-                Shop Products
+                Voir les produits
               </Link>
               <Link className="btn-secondary" href="/size-guide">
-                Size Guide
+                Guide des tailles
               </Link>
             </div>
           </div>
@@ -45,11 +45,11 @@ export default function HomePage() {
         <div className="container">
           <Reveal>
             <div className="section-header">
-              <span className="section-eyebrow">Featured Products</span>
+              <span className="section-eyebrow">Produits phares</span>
               <h2 className="section-title">
-                Built for
+                Conçus pour
                 <br />
-                performance.
+                performer.
               </h2>
             </div>
           </Reveal>

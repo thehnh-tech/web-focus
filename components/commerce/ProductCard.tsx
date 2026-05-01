@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
           onClick={handleAddToCart}
           type="button"
         >
-          {state === "adding" ? "Adding..." : state === "added" ? "Added" : "Add to Cart"}
+          {state === "adding" ? "Ajout..." : state === "added" ? "Ajouté" : "Ajouter au panier"}
         </button>
       </div>
     </article>

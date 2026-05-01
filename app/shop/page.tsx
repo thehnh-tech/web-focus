@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { ProductListing } from "@/components/commerce/ProductListing";
 
 export const metadata: Metadata = {
-  title: "Shop | FOCUS Compression Wear",
-  description: "Shop all FOCUS compression wear built for every training session."
+  title: "Boutique | FOCUS",
+  description: "Découvrez les vêtements de compression FOCUS conçus pour chaque séance."
 };
 
 export default function ShopPage() {
@@ -11,8 +11,8 @@ export default function ShopPage() {
     <>
       <section className="page-hero">
         <div className="container">
-          <h1>Shop All</h1>
-          <p>Compression wear built for every training session.</p>
+          <h1>Boutique</h1>
+          <p>Des vêtements de compression conçus pour chaque séance.</p>
         </div>
       </section>
       <ProductListing />

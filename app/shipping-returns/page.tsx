@@ -1,26 +1,26 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shipping & Returns",
-  description: "FOCUS delivery, returns and exchange policy."
+  title: "Livraison & retours",
+  description: "Politique de livraison, retour et échange FOCUS."
 };
 
 const sections = [
   {
-    title: "Delivery",
-    text: "We deliver across Tunisia. Delivery times may vary depending on your city."
+    title: "Livraison",
+    text: "Nous livrons partout en Tunisie. Les délais peuvent varier selon votre ville."
   },
   {
-    title: "Order Confirmation",
-    text: "After placing your order, our team may contact you to confirm your details."
+    title: "Confirmation de commande",
+    text: "Après votre commande, notre équipe peut vous contacter pour confirmer vos informations."
   },
   {
-    title: "Returns & Exchanges",
-    text: "Returns and exchanges are accepted according to the store policy. Items must be unworn and in original condition."
+    title: "Retours & échanges",
+    text: "Les retours et échanges sont acceptés selon la politique de la boutique. Les articles doivent être non portés et en état d’origine."
   },
   {
     title: "Support",
-    text: "For delivery or return questions, contact us at hello@focuswear.com."
+    text: "Pour toute question de livraison ou de retour, contactez-nous à hello@focuswear.com."
   }
 ];
 
@@ -29,7 +29,7 @@ export default function ShippingReturnsPage() {
     <section className="content-page container narrow">
       <div className="content-hero">
         <span className="section-eyebrow">Support</span>
-        <h1>Shipping & Returns</h1>
+        <h1>Livraison & retours</h1>
       </div>
       <div className="policy-list">
         {sections.map((section) => (

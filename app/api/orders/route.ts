@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/auth";
 import { connectToDatabase, hasMongoUri } from "@/lib/mongodb";
 import { OrderModel } from "@/lib/models";
 import { validateOrderPayload } from "@/lib/server-utils";
+import { sendOrderNotification } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -59,9 +60,35 @@ export async function POST(request: Request) {
 
   await connectToDatabase();
   const created = await OrderModel.create(validated.data);
+  const orderObject = created.toObject() as Record<string, unknown>;
+
+  try {
+    await sendOrderNotification({
+      id: String(orderObject._id),
+      fullName: String(orderObject.fullName),
+      phone: String(orderObject.phone),
+      city: String(orderObject.city),
+      address: String(orderObject.address),
+      email: String(orderObject.email),
+      size: String(orderObject.size),
+      items: orderObject.items as Array<{
+        name: string;
+        quantity: number;
+        size: string;
+        price: number;
+      }>,
+      subtotal: Number(orderObject.subtotal),
+      deliveryFee: Number(orderObject.deliveryFee),
+      total: Number(orderObject.total),
+      paymentMethod: String(orderObject.paymentMethod || "Paiement à la livraison"),
+      createdAt: orderObject.createdAt as Date
+    });
+  } catch (error) {
+    console.error("Failed to send order notification email", error);
+  }
 
   return NextResponse.json(
-    { order: serializeOrder(created.toObject() as Record<string, unknown>) },
+    { order: serializeOrder(orderObject) },
     { status: 201 }
   );
 }

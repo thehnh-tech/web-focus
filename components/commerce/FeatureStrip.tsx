@@ -3,23 +3,23 @@ import { Dumbbell, ShieldCheck, Wind, Gem } from "lucide-react";
 const features = [
   {
     icon: ShieldCheck,
-    title: "Second-Skin Fit",
-    text: "Snug support that moves with you."
+    title: "Coupe seconde peau",
+    text: "Un maintien ajusté qui suit chaque mouvement."
   },
   {
     icon: Wind,
-    title: "Breathable Fabric",
-    text: "Keeps you cool and dry."
+    title: "Tissu respirant",
+    text: "Aide à rester au frais pendant l’effort."
   },
   {
     icon: Dumbbell,
-    title: "Built for Training",
-    text: "Designed to perform through every rep."
+    title: "Fait pour l’entraînement",
+    text: "Conçu pour performer à chaque répétition."
   },
   {
     icon: Gem,
-    title: "Premium Quality",
-    text: "Durable materials. Made to last."
+    title: "Qualité premium",
+    text: "Des matériaux durables, faits pour tenir."
   }
 ];
 

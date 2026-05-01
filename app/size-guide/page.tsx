@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Size Guide",
-  description: "FOCUS compression tops size guide."
+  title: "Guide des tailles",
+  description: "Guide des tailles pour les t-shirts de compression FOCUS."
 };
 
 const rows = [
@@ -17,11 +17,12 @@ export default function SizeGuidePage() {
   return (
     <section className="content-page container narrow">
       <div className="content-hero">
-        <span className="section-eyebrow">Fit</span>
-        <h1>Size Guide</h1>
+        <span className="section-eyebrow">Coupe</span>
+        <h1>Guide des tailles</h1>
         <p>
-          FOCUS compression tops are designed for a close athletic fit. Choose
-          your usual size for compression. Size up for a more relaxed feel.
+          Les t-shirts de compression FOCUS sont conçus pour une coupe près du
+          corps. Choisissez votre taille habituelle pour un effet compression,
+          ou une taille au-dessus pour plus d’aisance.
         </p>
       </div>
 
@@ -29,10 +30,10 @@ export default function SizeGuidePage() {
         <table>
           <thead>
             <tr>
-              <th>Size</th>
-              <th>Chest</th>
-              <th>Height</th>
-              <th>Weight</th>
+              <th>Taille</th>
+              <th>Poitrine</th>
+              <th>Taille corporelle</th>
+              <th>Poids</th>
             </tr>
           </thead>
           <tbody>
@@ -46,7 +47,7 @@ export default function SizeGuidePage() {
           </tbody>
         </table>
       </div>
-      <p className="note">This guide is approximate. For a looser fit, choose one size up.</p>
+      <p className="note">Ce guide est indicatif. Pour une coupe plus ample, choisissez une taille au-dessus.</p>
     </section>
   );
 }

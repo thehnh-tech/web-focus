@@ -15,6 +15,9 @@ Required production environment variables on Vercel:
 ```bash
 MONGODB_URI=mongodb+srv://...
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
+RESEND_API_KEY=re_...
+ORDER_EMAIL_TO=hello@focuswear.com
+RESEND_FROM_EMAIL="FOCUS <orders@your-domain.com>"
 ADMIN_USERNAME=FOCUSADMIN2026
 ADMIN_PASSWORD=TaharBNA2026+
 ADMIN_SESSION_SECRET=use-a-long-random-secret
@@ -34,6 +37,7 @@ The admin panel supports:
 - add, edit and delete offers
 - view new orders
 - update order status
+- persistent admin session cookie
 
 ## Orders
 
@@ -48,6 +52,7 @@ Checkout creates MongoDB orders with:
 - cart items
 - 7 DT delivery fee
 - cash on delivery
+- Resend email notification when email variables are configured
 
 ## Production checks
 

@@ -27,7 +27,7 @@ export async function PATCH(request: Request, context: Context) {
   const status = String(body.status ?? "");
 
   if (!statuses.includes(status)) {
-    return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+    return NextResponse.json({ error: "Statut invalide." }, { status: 400 });
   }
 
   const { id } = await context.params;
@@ -35,7 +35,7 @@ export async function PATCH(request: Request, context: Context) {
   const updated = await OrderModel.findByIdAndUpdate(id, { status }, { new: true }).lean();
 
   if (!updated) {
-    return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    return NextResponse.json({ error: "Commande introuvable." }, { status: 404 });
   }
 
   return NextResponse.json({ ok: true });

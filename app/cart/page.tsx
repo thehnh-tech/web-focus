@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { CartView } from "@/components/commerce/CartView";
 
 export const metadata: Metadata = {
-  title: "Cart",
-  description: "Review your FOCUS cart."
+  title: "Panier",
+  description: "Consultez votre panier FOCUS."
 };
 
 export default function CartPage() {
