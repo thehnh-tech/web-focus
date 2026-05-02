@@ -109,6 +109,33 @@ export async function seedFallbackOffersIfEmpty() {
   }
 }
 
+export async function restoreFallbackOffers() {
+  const operations = fallbackProducts.map((product) => ({
+    updateOne: {
+      filter: { slug: product.slug },
+      update: {
+        $setOnInsert: {
+          slug: product.slug,
+          name: product.name,
+          price: product.price,
+          oldPrice: product.oldPrice,
+          category: product.category,
+          image: product.image,
+          secondaryImage: product.secondaryImage,
+          alt: product.alt,
+          color: product.color,
+          description: product.description,
+          featured: product.featured !== false
+        }
+      },
+      upsert: true
+    }
+  }));
+
+  const result = await OfferModel.bulkWrite(operations);
+  return result.upsertedCount;
+}
+
 export function validateOrderPayload(body: Record<string, unknown>) {
   const fullName = String(body.fullName ?? "").trim();
   const phone = String(body.phone ?? "").trim();

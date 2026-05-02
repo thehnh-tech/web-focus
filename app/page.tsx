@@ -1,27 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { FeaturedProducts } from "@/components/commerce/FeaturedProducts";
 import { FeatureStrip } from "@/components/commerce/FeatureStrip";
+import { HeroCarousel } from "@/components/commerce/HeroCarousel";
 import { Reveal } from "@/components/ui/Reveal";
-
-const heroSlides = [
-  {
-    src: "/images/shooting-focus-black-offi.png",
-    alt: "FocusGym black compression top photoshoot"
-  },
-  {
-    src: "/images/shooting-focus-black-offi-2.png",
-    alt: "FocusGym black compression top back photoshoot"
-  },
-  {
-    src: "/images/shooting-focus-white.png",
-    alt: "FocusGym white compression top photoshoot"
-  },
-  {
-    src: "/images/shooting-focus-white-offi.png",
-    alt: "FocusGym white compression top back photoshoot"
-  }
-];
 
 export default function HomePage() {
   return (
@@ -44,22 +25,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="hero-carousel-frame" aria-label="FocusGym product photos">
-            <div className="hero-carousel-track">
-              {heroSlides.map((slide, index) => (
-                <div className="hero-carousel-slide" key={slide.src}>
-                  <Image
-                    alt={slide.alt}
-                    className="hero-carousel-image"
-                    height={1492}
-                    priority={index === 0}
-                    src={slide.src}
-                    width={1054}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <HeroCarousel />
         </div>
       </section>
 

@@ -103,6 +103,7 @@ export function AdminDashboard() {
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRestoringOffers, setIsRestoringOffers] = useState(false);
   const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
 
   const isEditing = Boolean(form.id);
@@ -116,7 +117,25 @@ export function AdminDashboard() {
 
     if (offersResponse.ok) {
       const data = await offersResponse.json();
-      if (Array.isArray(data.offers)) {
+
+      if (data?.source === "fallback") {
+        try {
+          const restoreResponse = await fetch("/api/offers/restore-defaults", {
+            method: "POST"
+          });
+          const restoredData = await restoreResponse.json().catch(() => null);
+
+          if (restoreResponse.ok && Array.isArray(restoredData?.offers)) {
+            setOffers(restoredData.offers);
+          } else if (Array.isArray(data.offers)) {
+            setOffers(data.offers);
+          }
+        } catch {
+          if (Array.isArray(data.offers)) {
+            setOffers(data.offers);
+          }
+        }
+      } else if (Array.isArray(data.offers)) {
         setOffers(data.offers);
       }
     }
@@ -205,6 +224,32 @@ export function AdminDashboard() {
       setError("Impossible de supprimer l’offre.");
     } finally {
       setDeletingOfferId(null);
+    }
+  }
+
+  async function restoreInitialOffers() {
+    setMessage("");
+    setError("");
+    setIsRestoringOffers(true);
+
+    try {
+      const response = await fetch("/api/offers/restore-defaults", { method: "POST" });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(data?.error || "Impossible de restaurer les offres initiales.");
+        return;
+      }
+
+      if (Array.isArray(data?.offers)) {
+        setOffers(data.offers);
+      }
+
+      setMessage("Offres initiales restaurées.");
+    } catch {
+      setError("Impossible de restaurer les offres initiales.");
+    } finally {
+      setIsRestoringOffers(false);
     }
   }
 
@@ -432,7 +477,17 @@ export function AdminDashboard() {
         </form>
 
         <div className="admin-panel">
-          <h2>Offres</h2>
+          <div className="admin-section-head">
+            <h2>Offres</h2>
+            <button
+              className="btn-secondary"
+              disabled={isRestoringOffers}
+              onClick={restoreInitialOffers}
+              type="button"
+            >
+              {isRestoringOffers ? "Restauration..." : "Restaurer offres initiales"}
+            </button>
+          </div>
           <div className="admin-offers-list">
             {offers.map((product) => (
               <article className="admin-offer-row" key={product.id}>
