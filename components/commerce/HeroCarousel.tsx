@@ -38,7 +38,7 @@ export function HeroCarousel() {
 
     const interval = window.setInterval(() => {
       setActiveIndex((index) => (index + 1) % heroSlides.length);
-    }, 4200);
+    }, 2800);
 
     return () => window.clearInterval(interval);
   }, [isPaused]);
