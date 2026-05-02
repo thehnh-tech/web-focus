@@ -17,6 +17,7 @@ MONGODB_URI=mongodb+srv://...
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 RESEND_API_KEY=re_...
 ORDER_EMAIL_TO=focusgym.pro@gmail.com
+CONTACT_EMAIL_TO=focusgym.pro@gmail.com
 RESEND_FROM_EMAIL="FocusGym <orders@your-domain.com>"
 ADMIN_USERNAME=FOCUSADMIN2026
 ADMIN_PASSWORD=TaharBNA2026+

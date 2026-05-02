@@ -24,6 +24,13 @@ type OrderEmailInput = {
   createdAt?: Date | string;
 };
 
+type ContactEmailInput = {
+  fullName: string;
+  phone: string;
+  email: string;
+  message: string;
+};
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -107,6 +114,27 @@ function buildOrderEmail(order: OrderEmailInput) {
   `;
 }
 
+function buildContactEmail(contact: ContactEmailInput) {
+  return `
+    <div style="font-family:Arial,sans-serif;color:#171717;background:#ffffff;line-height:1.5;">
+      <h1 style="margin:0 0 8px;font-size:28px;text-transform:uppercase;">Nouveau message contact</h1>
+      <p style="margin:0 0 24px;color:#525252;">Message reçu depuis le site FocusGym.</p>
+
+      <div style="display:block;padding:18px;border:1px solid #e5e5e5;border-radius:8px;margin-bottom:18px;">
+        <h2 style="font-size:14px;text-transform:uppercase;margin:0 0 12px;">Client</h2>
+        <p style="margin:0;"><strong>${escapeHtml(contact.fullName)}</strong></p>
+        <p style="margin:0;">Téléphone : ${escapeHtml(contact.phone)}</p>
+        <p style="margin:0;">Email : ${escapeHtml(contact.email)}</p>
+      </div>
+
+      <div style="display:block;padding:18px;border:1px solid #e5e5e5;border-radius:8px;">
+        <h2 style="font-size:14px;text-transform:uppercase;margin:0 0 12px;">Message</h2>
+        <p style="margin:0;white-space:pre-wrap;">${escapeHtml(contact.message)}</p>
+      </div>
+    </div>
+  `;
+}
+
 export async function sendOrderNotification(order: OrderEmailInput) {
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.ORDER_EMAIL_TO;
@@ -123,6 +151,31 @@ export async function sendOrderNotification(order: OrderEmailInput) {
     replyTo: order.email,
     subject: `FocusGym - Nouveau bon de commande #${order.id.slice(-6).toUpperCase()}`,
     html: buildOrderEmail(order)
+  });
+
+  if (error) {
+    throw new Error(JSON.stringify(error));
+  }
+
+  return { skipped: false, id: data?.id };
+}
+
+export async function sendContactNotification(contact: ContactEmailInput) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.CONTACT_EMAIL_TO || process.env.ORDER_EMAIL_TO;
+  const from = process.env.RESEND_FROM_EMAIL;
+
+  if (!apiKey || !to || !from) {
+    return { skipped: true };
+  }
+
+  const resend = new Resend(apiKey);
+  const { data, error } = await resend.emails.send({
+    from,
+    to: [to],
+    replyTo: contact.email,
+    subject: `FocusGym - Nouveau message de ${contact.fullName}`,
+    html: buildContactEmail(contact)
   });
 
   if (error) {
