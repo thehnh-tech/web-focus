@@ -4,6 +4,25 @@ import { FeaturedProducts } from "@/components/commerce/FeaturedProducts";
 import { FeatureStrip } from "@/components/commerce/FeatureStrip";
 import { Reveal } from "@/components/ui/Reveal";
 
+const heroSlides = [
+  {
+    src: "/images/shooting-focus-black-offi.png",
+    alt: "FocusGym black compression top photoshoot"
+  },
+  {
+    src: "/images/shooting-focus-black-offi-2.png",
+    alt: "FocusGym black compression top back photoshoot"
+  },
+  {
+    src: "/images/shooting-focus-white.png",
+    alt: "FocusGym white compression top photoshoot"
+  },
+  {
+    src: "/images/shooting-focus-white-offi.png",
+    alt: "FocusGym white compression top back photoshoot"
+  }
+];
+
 export default function HomePage() {
   return (
     <>
@@ -11,7 +30,9 @@ export default function HomePage() {
         <div className="hero-inner">
           <div>
             <h1 className="hero-title">
-              FocusGym | Official Website
+              FocusGym
+              <br />
+              Official Website
             </h1>
             <p className="hero-text">
               Des vêtements de compression performants pour accompagner chaque
@@ -21,20 +42,23 @@ export default function HomePage() {
               <Link className="btn-primary" href="/shop">
                 Voir les produits
               </Link>
-              <Link className="btn-secondary" href="/size-guide">
-                Guide détaillé
-              </Link>
             </div>
           </div>
-          <div className="hero-image">
-            <Image
-              alt="Black and white FocusGym compression tops"
-              className="hero-product-image"
-              height={720}
-              priority
-              src="/images/packhero.png"
-              width={720}
-            />
+          <div className="hero-carousel-frame" aria-label="FocusGym product photos">
+            <div className="hero-carousel-track">
+              {heroSlides.map((slide, index) => (
+                <div className="hero-carousel-slide" key={slide.src}>
+                  <Image
+                    alt={slide.alt}
+                    className="hero-carousel-image"
+                    height={1492}
+                    priority={index === 0}
+                    src={slide.src}
+                    width={1054}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

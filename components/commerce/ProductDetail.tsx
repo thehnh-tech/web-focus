@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart";
-import { fallbackProducts, formatColor, formatPrice, sizes } from "@/lib/products";
+import { formatColor, formatPrice, sizes } from "@/lib/products";
 import type { CartItem, Product } from "@/lib/types";
 import { Accordion } from "@/components/ui/Accordion";
 
@@ -18,7 +18,7 @@ const accordionItems = [
   {
     title: "Matières",
     content:
-      "80% Polyamide et 20% Elastane. Tissu extensible et doux, avec une construction respirante adaptée à l’effort. Qualité européenne 🇪🇺."
+      "80% Polyamide et 20% Elastane. Tissu extensible et doux, avec une construction respirante adaptée à l’effort."
   },
   {
     title: "Taille & coupe",
@@ -108,29 +108,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
         <div className="option-group">
           <div className="option-head">
-            <span>Couleur</span>
-            <strong>{formatColor(product.color)}</strong>
-          </div>
-          <div className="color-options">
-            {fallbackProducts
-              .filter((item) => item.category === "Compression Tops")
-              .map((item) => (
-                <Link
-                  aria-label={`Choisir ${formatColor(item.color)}`}
-                  className={`color-swatch ${item.color?.toLowerCase()} ${
-                    item.slug === product.slug ? "active" : ""
-                  }`}
-                  href={`/products/${item.slug}`}
-                  key={item.id}
-                />
-              ))}
-          </div>
-        </div>
-
-        <div className="option-group">
-          <div className="option-head">
             <span>Taille</span>
-            <Link href="/size-guide">Guide détaillé</Link>
           </div>
           <div className="size-options">
             {sizes.map((size) => (

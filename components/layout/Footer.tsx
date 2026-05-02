@@ -43,8 +43,14 @@ export function Footer() {
     <footer className="footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Image alt="FocusGym logo" height={56} src="/images/logo.png" width={56} />
-          <p>Sportswear de performance avec qualité européenne 🇪🇺, pensé pour s’entraîner avec discipline.</p>
+          <Image
+            alt="FocusGym footer logo"
+            className="footer-logo"
+            height={64}
+            src="/images/footer.png"
+            width={96}
+          />
+          <p>Sportswear de performance pensé pour s’entraîner avec discipline.</p>
           <div className="social-links" aria-label="Social links">
             <a href="https://www.instagram.com/focusgym.tn/" aria-label="Instagram">
               <Instagram aria-hidden="true" />

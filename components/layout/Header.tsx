@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Search, User, ShoppingBag, X } from "lucide-react";
+import { Menu, User, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 
@@ -65,9 +65,6 @@ export function Header() {
         </Link>
 
         <div className="header-actions">
-          <button className="icon-button desktop-icon" aria-label="Recherche" type="button">
-            <Search aria-hidden="true" />
-          </button>
           <Link className="icon-button desktop-icon" href="/admin/login" aria-label="Compte">
             <User aria-hidden="true" />
           </Link>

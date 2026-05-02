@@ -8,16 +8,16 @@ import { Header } from "@/components/layout/Header";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "FocusGym | Official Website",
+    default: "FocusGym Official Website",
     template: "%s | FocusGym"
   },
   description:
-    "Découvrez FocusGym, des vêtements de compression premium de qualité européenne pour l’entraînement, la performance et la discipline.",
+    "Découvrez FocusGym, des vêtements de compression premium pour l’entraînement, la performance et la discipline.",
   openGraph: {
-    title: "FocusGym | Official Website",
+    title: "FocusGym Official Website",
     description:
-      "T-shirts de compression premium de qualité européenne pour l’entraînement, la performance et la discipline.",
-    images: ["/images/packhero.png"]
+      "T-shirts de compression premium pour l’entraînement, la performance et la discipline.",
+    images: ["/images/shooting-focus-black-offi.png"]
   }
 };
 

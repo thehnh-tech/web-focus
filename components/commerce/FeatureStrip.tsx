@@ -18,7 +18,7 @@ const features = [
   },
   {
     icon: Gem,
-    title: "Qualité européenne 🇪🇺",
+    title: "Qualité premium",
     text: "Une construction durable, pensée pour tenir dans le temps."
   }
 ];
