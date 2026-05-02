@@ -121,7 +121,7 @@ export async function sendOrderNotification(order: OrderEmailInput) {
     from,
     to: [to],
     replyTo: order.email,
-    subject: `FOCUS - Nouveau bon de commande #${order.id.slice(-6).toUpperCase()}`,
+    subject: `FocusGym - Nouveau bon de commande #${order.id.slice(-6).toUpperCase()}`,
     html: buildOrderEmail(order)
   });
 

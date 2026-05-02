@@ -11,9 +11,7 @@ export default function HomePage() {
         <div className="hero-inner">
           <div>
             <h1 className="hero-title">
-              Conçu
-              <br />
-              pour le focus.
+              FocusGym | Official Website
             </h1>
             <p className="hero-text">
               Des vêtements de compression performants pour accompagner chaque
@@ -24,13 +22,13 @@ export default function HomePage() {
                 Voir les produits
               </Link>
               <Link className="btn-secondary" href="/size-guide">
-                Guide des tailles
+                Guide détaillé
               </Link>
             </div>
           </div>
           <div className="hero-image">
             <Image
-              alt="Black and white FOCUS compression tops"
+              alt="Black and white FocusGym compression tops"
               className="hero-product-image"
               height={720}
               priority
@@ -46,11 +44,7 @@ export default function HomePage() {
           <Reveal>
             <div className="section-header">
               <span className="section-eyebrow">Produits phares</span>
-              <h2 className="section-title">
-                Conçus pour
-                <br />
-                performer.
-              </h2>
+              <h2 className="section-title">Sélection FocusGym</h2>
             </div>
           </Reveal>
           <Reveal>

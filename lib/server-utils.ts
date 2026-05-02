@@ -1,10 +1,10 @@
 import type { Product, ProductCategory } from "@/lib/types";
+import { OfferModel } from "@/lib/models";
 import { fallbackProducts, governorates, orderSizes } from "@/lib/products";
 
 export const productCategories: ProductCategory[] = [
   "Compression Tops",
-  "Sets",
-  "Accessories"
+  "Sets"
 ];
 
 export function slugify(value: string) {
@@ -76,6 +76,37 @@ export function validateOfferPayload(body: Record<string, unknown>) {
       featured: body.featured !== false
     }
   };
+}
+
+export async function seedFallbackOffersIfEmpty() {
+  const count = await OfferModel.estimatedDocumentCount();
+
+  if (count > 0) {
+    return;
+  }
+
+  try {
+    await OfferModel.insertMany(
+      fallbackProducts.map((product) => ({
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        oldPrice: product.oldPrice,
+        category: product.category,
+        image: product.image,
+        secondaryImage: product.secondaryImage,
+        alt: product.alt,
+        color: product.color,
+        description: product.description,
+        featured: product.featured !== false
+      })),
+      { ordered: false }
+    );
+  } catch (error) {
+    if ((error as { code?: number }).code !== 11000) {
+      throw error;
+    }
+  }
 }
 
 export function validateOrderPayload(body: Record<string, unknown>) {

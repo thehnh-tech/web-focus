@@ -8,7 +8,7 @@ const offerSchema = new Schema(
     oldPrice: { type: Number },
     category: {
       type: String,
-      enum: ["Compression Tops", "Sets", "Accessories"],
+      enum: ["Compression Tops", "Sets"],
       required: true
     },
     image: { type: String, required: true },

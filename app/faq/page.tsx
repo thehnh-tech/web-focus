@@ -3,7 +3,7 @@ import { Accordion } from "@/components/ui/Accordion";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Questions fréquentes sur les vêtements de compression FOCUS."
+  description: "Questions fréquentes sur les vêtements de compression FocusGym."
 };
 
 const faqItems = [
@@ -27,7 +27,8 @@ const faqItems = [
   },
   {
     title: "Comment laver le t-shirt de compression ?",
-    content: "Lavage à froid. Ne pas utiliser d’eau de Javel. Séchage à l’air libre recommandé."
+    content:
+      "Conseils d’entretien : séchage en machine à basse température. Ne pas repasser. Ne pas utiliser d’adoucissant. Ne pas nettoyer à sec."
   }
 ];
 

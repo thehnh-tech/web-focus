@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "@/components/commerce/ProductCard";
 import { fallbackProducts } from "@/lib/products";
-import type { Product } from "@/lib/types";
+import type { Product, ProductCategory } from "@/lib/types";
+
+const featuredCategories: ProductCategory[] = ["Compression Tops", "Sets"];
 
 export function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>(fallbackProducts);
@@ -26,7 +28,13 @@ export function FeaturedProducts() {
   }, []);
 
   const featured = useMemo(
-    () => products.filter((product) => product.featured !== false).slice(0, 3),
+    () =>
+      products
+        .filter(
+          (product) =>
+            product.featured !== false && featuredCategories.includes(product.category)
+        )
+        .slice(0, 3),
     [products]
   );
 

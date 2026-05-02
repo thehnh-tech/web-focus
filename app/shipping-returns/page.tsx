@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Livraison & retours",
-  description: "Politique de livraison, retour et échange FOCUS."
+  description: "Politique de livraison, retour et échange FocusGym."
 };
 
 const sections = [
@@ -20,7 +20,7 @@ const sections = [
   },
   {
     title: "Support",
-    text: "Pour toute question de livraison ou de retour, contactez-nous à hello@focuswear.com."
+    text: "Pour toute question de livraison ou de retour, contactez-nous à focusgym.pro@gmail.com."
   }
 ];
 

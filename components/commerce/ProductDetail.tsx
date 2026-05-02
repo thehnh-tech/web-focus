@@ -13,12 +13,12 @@ const accordionItems = [
   {
     title: "Description",
     content:
-      "Pensé pour l’entraînement, FOCUS offre une coupe près du corps qui accompagne le mouvement sans distraction."
+      "Pensé pour l’entraînement, FocusGym offre une coupe près du corps qui accompagne le mouvement sans distraction."
   },
   {
     title: "Matières",
     content:
-      "Tissu extensible et doux, avec une construction respirante adaptée à l’effort."
+      "80% Polyamide et 20% Elastane. Tissu extensible et doux, avec une construction respirante adaptée à l’effort. Qualité européenne 🇪🇺."
   },
   {
     title: "Taille & coupe",
@@ -32,7 +32,8 @@ const accordionItems = [
   },
   {
     title: "Entretien",
-    content: "Lavage à froid. Ne pas utiliser d’eau de Javel. Séchage à l’air libre recommandé."
+    content:
+      "Conseils d’entretien : séchage en machine à basse température. Ne pas repasser. Ne pas utiliser d’adoucissant. Ne pas nettoyer à sec."
   }
 ];
 
@@ -129,7 +130,7 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="option-group">
           <div className="option-head">
             <span>Taille</span>
-            <Link href="/size-guide">Guide des tailles</Link>
+            <Link href="/size-guide">Guide détaillé</Link>
           </div>
           <div className="size-options">
             {sizes.map((size) => (

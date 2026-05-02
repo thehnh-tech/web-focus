@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
-  description: "Politique de confidentialité FOCUS."
+  description: "Politique de confidentialité FocusGym."
 };
 
 const sections = [
@@ -24,7 +24,7 @@ const sections = [
   },
   {
     title: "Contact",
-    text: "Pour toute question liée à la confidentialité, contactez hello@focuswear.com."
+    text: "Pour toute question liée à la confidentialité, contactez focusgym.pro@gmail.com."
   }
 ];
 

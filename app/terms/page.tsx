@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Conditions générales de vente",
-  description: "Conditions générales de vente FOCUS."
+  description: "Conditions générales de vente FocusGym."
 };
 
 const terms = [
@@ -32,7 +32,7 @@ const terms = [
   },
   {
     title: "Contact",
-    text: "Pour toute demande, contactez hello@focuswear.com."
+    text: "Pour toute demande, contactez focusgym.pro@gmail.com."
   }
 ];
 

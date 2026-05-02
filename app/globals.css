@@ -381,12 +381,13 @@ button:disabled {
 
 .hero-title {
   animation: fadeUp 0.7s ease forwards;
-  font-size: clamp(48px, 7vw, 96px);
+  font-size: 64px;
   font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  letter-spacing: 0;
+  line-height: 1;
   margin: 0;
-  text-transform: uppercase;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .hero-text {
@@ -1754,6 +1755,10 @@ tr:last-child td {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .hero-title {
+    font-size: 50px;
+  }
+
   .product-page,
   .cart-layout,
   .checkout-layout,
@@ -1825,7 +1830,7 @@ tr:last-child td {
   }
 
   .hero-title {
-    font-size: 42px;
+    font-size: 30px;
     line-height: 1;
   }
 
@@ -1945,6 +1950,10 @@ tr:last-child td {
 }
 
 @media (max-width: 480px) {
+  .hero-title {
+    font-size: 22px;
+  }
+
   .product-grid,
   .shop-grid {
     grid-template-columns: 1fr;
@@ -1961,6 +1970,12 @@ tr:last-child td {
 
   .page-hero {
     padding: 54px 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-title {
+    font-size: 19px;
   }
 }
 

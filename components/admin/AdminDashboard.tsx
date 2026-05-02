@@ -62,8 +62,7 @@ const statusLabels: Record<Order["status"], string> = {
 
 const categoryLabels: Record<ProductCategory, string> = {
   "Compression Tops": "Compression",
-  Sets: "Packs",
-  Accessories: "Accessoires"
+  Sets: "Packs"
 };
 
 function productToForm(product: Product): OfferForm {
@@ -104,6 +103,7 @@ export function AdminDashboard() {
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
 
   const isEditing = Boolean(form.id);
 
@@ -157,7 +157,7 @@ export function AdminDashboard() {
     setMessage("");
     setError("");
 
-    const endpoint = isEditing ? `/api/offers/${form.id}` : "/api/offers";
+    const endpoint = isEditing ? `/api/offers/${encodeURIComponent(form.id ?? "")}` : "/api/offers";
     const method = isEditing ? "PUT" : "POST";
 
     const response = await fetch(endpoint, {
@@ -184,16 +184,28 @@ export function AdminDashboard() {
   }
 
   async function deleteOffer(product: Product) {
-    const response = await fetch(`/api/offers/${product.id}`, { method: "DELETE" });
+    setMessage("");
+    setError("");
+    setDeletingOfferId(product.id);
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => null);
-      setError(data?.error || "Impossible de supprimer l’offre.");
-      return;
+    try {
+      const response = await fetch(`/api/offers/${encodeURIComponent(product.id)}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setError(data?.error || "Impossible de supprimer l’offre.");
+        return;
+      }
+
+      setMessage("Offre supprimée.");
+      await loadData();
+    } catch {
+      setError("Impossible de supprimer l’offre.");
+    } finally {
+      setDeletingOfferId(null);
     }
-
-    setMessage("Offre supprimée.");
-    await loadData();
   }
 
   async function updateOrderStatus(order: Order, status: Order["status"]) {
@@ -221,7 +233,7 @@ export function AdminDashboard() {
       <div className="admin-topbar">
         <div>
           <span className="section-eyebrow">Tableau de bord</span>
-          <h1>FOCUS Admin</h1>
+          <h1>FocusGym Admin</h1>
         </div>
         <button className="btn-secondary" onClick={logout} type="button">
           Déconnexion
@@ -364,7 +376,6 @@ export function AdminDashboard() {
             >
               <option value="Compression Tops">Compression</option>
               <option value="Sets">Packs</option>
-              <option value="Accessories">Accessoires</option>
             </select>
             <input
               className="admin-input"
@@ -428,15 +439,17 @@ export function AdminDashboard() {
                 <Image alt={product.alt} height={64} src={product.image} width={64} />
                 <div>
                   <strong>{product.name}</strong>
-                  <span>
-                    {categoryLabels[product.category]} / {formatPrice(product.price)}
-                  </span>
+                  <span>{categoryLabels[product.category]} / {formatPrice(product.price)}</span>
                 </div>
                 <button onClick={() => setForm(productToForm(product))} type="button">
                   Modifier
                 </button>
-                <button onClick={() => deleteOffer(product)} type="button">
-                  Supprimer
+                <button
+                  disabled={deletingOfferId === product.id}
+                  onClick={() => deleteOffer(product)}
+                  type="button"
+                >
+                  {deletingOfferId === product.id ? "Suppression..." : "Supprimer"}
                 </button>
               </article>
             ))}

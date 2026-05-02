@@ -8,7 +8,7 @@ import { useCart } from "@/lib/cart";
 
 const navLinks = [
   { href: "/shop", label: "Boutique" },
-  { href: "/about", label: "A propos" },
+  { href: "/about", label: "À propos" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -53,9 +53,9 @@ export function Header() {
           <Menu aria-hidden="true" />
         </button>
 
-        <Link className="logo-link" href="/" aria-label="FOCUS home">
+        <Link className="logo-link" href="/" aria-label="FocusGym home">
           <Image
-            alt="FOCUS logo"
+            alt="FocusGym logo"
             className="logo-image"
             height={58}
             priority
@@ -80,7 +80,7 @@ export function Header() {
 
       <div className={`mobile-menu ${isOpen ? "open" : ""}`} aria-hidden={!isOpen}>
         <div className="mobile-menu-head">
-          <Image alt="FOCUS logo" height={48} src="/images/logo.png" width={48} />
+          <Image alt="FocusGym logo" height={48} src="/images/logo.png" width={48} />
           <button
             aria-label="Fermer le menu"
             className="icon-button"
@@ -104,17 +104,9 @@ export function Header() {
           ))}
           <Link
             className="mobile-menu-link"
-            href="/contact"
-            onClick={() => setIsOpen(false)}
-            style={{ transitionDelay: isOpen ? "220ms" : "0ms" }}
-          >
-            Contact
-          </Link>
-          <Link
-            className="mobile-menu-link"
             href="/admin/login"
             onClick={() => setIsOpen(false)}
-            style={{ transitionDelay: isOpen ? "275ms" : "0ms" }}
+            style={{ transitionDelay: isOpen ? `${navLinks.length * 55}ms` : "0ms" }}
           >
             Compte
           </Link>

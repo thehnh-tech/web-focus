@@ -3,7 +3,7 @@ import { isAdminAuthenticated } from "@/lib/auth";
 import { connectToDatabase, hasMongoUri } from "@/lib/mongodb";
 import { OfferModel } from "@/lib/models";
 import { fallbackProducts } from "@/lib/products";
-import { serializeOffer, validateOfferPayload } from "@/lib/server-utils";
+import { seedFallbackOffersIfEmpty, serializeOffer, validateOfferPayload } from "@/lib/server-utils";
 
 export const runtime = "nodejs";
 
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
   }
 
   await connectToDatabase();
+  await seedFallbackOffersIfEmpty();
   const created = await OfferModel.create(validated.data);
 
   return NextResponse.json(

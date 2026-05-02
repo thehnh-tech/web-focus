@@ -6,7 +6,7 @@ export function AnnouncementBar() {
       <div className="ticker-track">
         {tickerItems.map((item) => (
           <span className="ticker-item" key={item}>
-            ENTRAINE-TOI PLUS FORT. RESTE FOCUS. <span aria-hidden="true">|</span>
+            TRAIN HARDER. STAY FOCUSED. QUALITÉ EUROPÉENNE 🇪🇺 <span aria-hidden="true">|</span>
           </span>
         ))}
       </div>

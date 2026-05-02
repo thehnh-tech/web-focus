@@ -14,12 +14,12 @@ const features = [
   {
     icon: Dumbbell,
     title: "Fait pour l’entraînement",
-    text: "Conçu pour performer à chaque répétition."
+    text: "Pensé pour les séances intenses et les mouvements répétés."
   },
   {
     icon: Gem,
-    title: "Qualité premium",
-    text: "Des matériaux durables, faits pour tenir."
+    title: "Qualité européenne 🇪🇺",
+    text: "Une construction durable, pensée pour tenir dans le temps."
   }
 ];
 

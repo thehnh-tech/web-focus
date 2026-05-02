@@ -8,7 +8,8 @@ import { ProductCard } from "@/components/commerce/ProductCard";
 type SortMode = "Featured" | "Price: Low to High" | "Price: High to Low" | "Newest";
 type FilterMode = "All" | ProductCategory;
 
-const filters: FilterMode[] = ["All", "Compression Tops", "Sets", "Accessories"];
+const shopCategories: ProductCategory[] = ["Compression Tops", "Sets"];
+const filters: FilterMode[] = ["All", ...shopCategories];
 const sorts: SortMode[] = [
   "Featured",
   "Price: Low to High",
@@ -19,8 +20,7 @@ const sorts: SortMode[] = [
 const filterLabels: Record<FilterMode, string> = {
   All: "Tous",
   "Compression Tops": "Compression",
-  Sets: "Packs",
-  Accessories: "Accessoires"
+  Sets: "Packs"
 };
 
 const sortLabels: Record<SortMode, string> = {
@@ -59,10 +59,13 @@ export function ProductListing({
   }, []);
 
   const visibleProducts = useMemo(() => {
+    const shopProducts = products.filter((product) =>
+      shopCategories.includes(product.category)
+    );
     const filtered =
       activeFilter === "All"
-        ? products
-        : products.filter((product) => product.category === activeFilter);
+        ? shopProducts
+        : shopProducts.filter((product) => product.category === activeFilter);
 
     return [...filtered].sort((a, b) => {
       if (sort === "Price: Low to High") return a.price - b.price;

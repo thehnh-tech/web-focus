@@ -31,7 +31,7 @@ export function ContactForm() {
       </div>
       {sent ? (
         <p className="form-success">
-          Message prêt. Contactez FOCUS directement par email ou WhatsApp pour le moment.
+          Message prêt. Contactez FocusGym directement par email ou WhatsApp pour le moment.
         </p>
       ) : null}
       <button className="buy-button" type="submit">

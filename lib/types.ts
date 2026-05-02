@@ -1,4 +1,4 @@
-export type ProductCategory = "Compression Tops" | "Sets" | "Accessories";
+export type ProductCategory = "Compression Tops" | "Sets";
 
 export type Product = {
   id: string;
@@ -22,7 +22,7 @@ export type CartItem = {
   price: number;
   image: string;
   color?: string;
-  size: "S" | "M" | "L" | "XL" | "XXL";
+  size: "S" | "M" | "L";
   quantity: number;
 };
 

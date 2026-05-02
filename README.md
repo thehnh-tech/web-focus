@@ -1,6 +1,6 @@
-# FOCUS Commerce
+# FocusGym Commerce
 
-Next.js e-commerce front-end and admin/backend for the FOCUS compression wear brand.
+Next.js e-commerce front-end and admin/backend for the FocusGym compression wear brand.
 
 ## Local setup
 
@@ -16,8 +16,8 @@ Required production environment variables on Vercel:
 MONGODB_URI=mongodb+srv://...
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 RESEND_API_KEY=re_...
-ORDER_EMAIL_TO=hello@focuswear.com
-RESEND_FROM_EMAIL="FOCUS <orders@your-domain.com>"
+ORDER_EMAIL_TO=focusgym.pro@gmail.com
+RESEND_FROM_EMAIL="FocusGym <orders@your-domain.com>"
 ADMIN_USERNAME=FOCUSADMIN2026
 ADMIN_PASSWORD=TaharBNA2026+
 ADMIN_SESSION_SECRET=use-a-long-random-secret

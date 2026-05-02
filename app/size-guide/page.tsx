@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Guide des tailles",
-  description: "Guide des tailles pour les t-shirts de compression FOCUS."
+  description: "Guide détaillé pour les t-shirts de compression FocusGym."
 };
 
 const rows = [
   ["S", "86-94 cm", "160-170 cm", "55-65 kg"],
   ["M", "94-102 cm", "170-178 cm", "65-75 kg"],
-  ["L", "102-110 cm", "178-185 cm", "75-85 kg"],
-  ["XL", "110-118 cm", "185-192 cm", "85-95 kg"],
-  ["XXL", "118-126 cm", "190+ cm", "95+ kg"]
+  ["L", "102-110 cm", "178-185 cm", "75-85 kg"]
 ];
 
 export default function SizeGuidePage() {
@@ -20,9 +18,9 @@ export default function SizeGuidePage() {
         <span className="section-eyebrow">Coupe</span>
         <h1>Guide des tailles</h1>
         <p>
-          Les t-shirts de compression FOCUS sont conçus pour une coupe près du
-          corps. Choisissez votre taille habituelle pour un effet compression,
-          ou une taille au-dessus pour plus d’aisance.
+          Les t-shirts de compression FocusGym sont conçus pour une coupe près
+          du corps. Choisissez entre S, M et L selon votre tour de poitrine,
+          votre taille corporelle et votre poids.
         </p>
       </div>
 
@@ -47,7 +45,24 @@ export default function SizeGuidePage() {
           </tbody>
         </table>
       </div>
-      <p className="note">Ce guide est indicatif. Pour une coupe plus ample, choisissez une taille au-dessus.</p>
+      <div className="policy-list size-notes">
+        <article>
+          <h2>Guide détaillé</h2>
+          <p>
+            Si vous êtes entre deux tailles, choisissez la taille supérieure
+            pour plus d’aisance et la taille inférieure pour un maintien plus
+            compressif.
+          </p>
+        </article>
+        <article>
+          <h2>Coupe</h2>
+          <p>
+            La coupe est ajustée au torse et aux bras pour rester stable pendant
+            les séances intenses.
+          </p>
+        </article>
+      </div>
+      <p className="note">Ce guide est indicatif. Les tailles disponibles sont S, M et L.</p>
     </section>
   );
 }

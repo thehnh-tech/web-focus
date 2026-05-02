@@ -4,7 +4,7 @@ import { ContactForm } from "@/components/commerce/ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contactez FOCUS pour une taille, une livraison ou une commande."
+  description: "Contactez FocusGym pour une taille, une livraison ou une commande."
 };
 
 export default function ContactPage() {
@@ -21,10 +21,10 @@ export default function ContactPage() {
 
         <aside className="contact-card">
           <h2>Contact</h2>
-          <p>Email: hello@focuswear.com</p>
-          <p>Téléphone : +216 54 254 597</p>
+          <p>Email: focusgym.pro@gmail.com</p>
+          <p>Téléphone : 25 166 891</p>
           <p>Adresse : Tunis, Tunisie</p>
-          <Link className="btn-secondary" href="https://wa.me/21654254597">
+          <Link className="btn-secondary" href="https://wa.me/21625166891">
             Message WhatsApp
           </Link>
         </aside>

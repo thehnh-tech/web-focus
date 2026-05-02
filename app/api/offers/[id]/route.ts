@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { connectToDatabase, hasMongoUri } from "@/lib/mongodb";
 import { OfferModel } from "@/lib/models";
-import { serializeOffer, validateOfferPayload } from "@/lib/server-utils";
+import { seedFallbackOffersIfEmpty, serializeOffer, validateOfferPayload } from "@/lib/server-utils";
 
 export const runtime = "nodejs";
 
@@ -31,10 +31,10 @@ export async function PUT(request: Request, context: Context) {
 
   const { id } = await context.params;
   await connectToDatabase();
+  await seedFallbackOffersIfEmpty();
   const selector = /^[a-f\d]{24}$/i.test(id) ? { _id: id } : { slug: id };
   const updated = await OfferModel.findOneAndUpdate(selector, validated.data, {
-    new: true,
-    upsert: true
+    new: true
   }).lean();
 
   if (!updated) {
@@ -60,6 +60,7 @@ export async function DELETE(_request: Request, context: Context) {
 
   const { id } = await context.params;
   await connectToDatabase();
+  await seedFallbackOffersIfEmpty();
   const selector = /^[a-f\d]{24}$/i.test(id) ? { _id: id } : { slug: id };
   const deleted = await OfferModel.findOneAndDelete(selector).lean();
 

@@ -48,7 +48,7 @@ export function AdminLoginForm() {
     <section className="admin-login-page">
       <form className="admin-login-card" onSubmit={handleSubmit}>
         <span className="section-eyebrow">Admin</span>
-        <h1>FOCUS Admin</h1>
+        <h1>FocusGym Admin</h1>
         <div className="field">
           <label htmlFor="admin-username">Identifiant</label>
           <input
