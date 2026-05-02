@@ -50,22 +50,24 @@ export function HeroCarousel() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div
-        className="hero-carousel-track"
-        style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-      >
-        {heroSlides.map((slide, index) => (
-          <div className="hero-carousel-slide" key={slide.src}>
-            <Image
-              alt={slide.alt}
-              className="hero-carousel-image"
-              height={1492}
-              priority={index === 0}
-              src={slide.src}
-              width={1054}
-            />
-          </div>
-        ))}
+      <div className="hero-carousel-viewport">
+        <div
+          className="hero-carousel-track"
+          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+          {heroSlides.map((slide, index) => (
+            <div className="hero-carousel-slide" key={slide.src}>
+              <Image
+                alt={slide.alt}
+                className="hero-carousel-image"
+                height={1492}
+                priority={index === 0}
+                src={slide.src}
+                width={1054}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <button
