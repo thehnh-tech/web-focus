@@ -928,6 +928,18 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.field label span,
+.required-note {
+  color: var(--destructive);
+}
+
+.required-note {
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+  text-transform: uppercase;
+}
+
 .field input,
 .field select,
 .field textarea,

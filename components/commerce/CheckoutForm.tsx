@@ -80,11 +80,14 @@ export function CheckoutForm() {
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
+          <p className="required-note">Tous les champs sont obligatoires.</p>
           <div className="checkout-step">
             <h2>Contact</h2>
             <div className="form-grid two-cols">
               <div className="field">
-                <label htmlFor="fullName">Nom complet</label>
+                <label htmlFor="fullName">
+                  Nom complet <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="fullName"
                   minLength={2}
@@ -94,7 +97,9 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="phone">Téléphone</label>
+                <label htmlFor="phone">
+                  Téléphone <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="phone"
                   onChange={(event) => updateField("phone", event.target.value)}
@@ -104,7 +109,9 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">
+                  Email <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="email"
                   onChange={(event) => updateField("email", event.target.value)}
@@ -114,7 +121,9 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="size">Taille</label>
+                <label htmlFor="size">
+                  Taille <span aria-hidden="true">*</span>
+                </label>
                 <select
                   id="size"
                   onChange={(event) => updateField("size", event.target.value)}
@@ -133,7 +142,9 @@ export function CheckoutForm() {
             <h2>Livraison</h2>
             <div className="form-grid two-cols">
               <div className="field">
-                <label htmlFor="city">Ville</label>
+                <label htmlFor="city">
+                  Ville <span aria-hidden="true">*</span>
+                </label>
                 <select
                   id="city"
                   onChange={(event) => updateField("city", event.target.value)}
@@ -146,7 +157,9 @@ export function CheckoutForm() {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor="address">Adresse</label>
+                <label htmlFor="address">
+                  Adresse <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="address"
                   onChange={(event) => updateField("address", event.target.value)}

@@ -53,8 +53,11 @@ export function ContactForm() {
 
   return (
     <form className="contact-form" onSubmit={handleSubmit}>
+      <p className="required-note">Tous les champs sont obligatoires.</p>
       <div className="field">
-        <label htmlFor="contact-name">Nom complet</label>
+        <label htmlFor="contact-name">
+          Nom complet <span aria-hidden="true">*</span>
+        </label>
         <input
           id="contact-name"
           minLength={2}
@@ -64,7 +67,9 @@ export function ContactForm() {
         />
       </div>
       <div className="field">
-        <label htmlFor="contact-email">Email</label>
+        <label htmlFor="contact-email">
+          Email <span aria-hidden="true">*</span>
+        </label>
         <input
           id="contact-email"
           onChange={(event) => updateField("email", event.target.value)}
@@ -74,7 +79,9 @@ export function ContactForm() {
         />
       </div>
       <div className="field">
-        <label htmlFor="contact-phone">Téléphone</label>
+        <label htmlFor="contact-phone">
+          Téléphone <span aria-hidden="true">*</span>
+        </label>
         <input
           id="contact-phone"
           onChange={(event) => updateField("phone", event.target.value)}
@@ -84,7 +91,9 @@ export function ContactForm() {
         />
       </div>
       <div className="field">
-        <label htmlFor="contact-message">Message</label>
+        <label htmlFor="contact-message">
+          Message <span aria-hidden="true">*</span>
+        </label>
         <textarea
           id="contact-message"
           minLength={8}
