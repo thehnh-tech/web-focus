@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       phone: String(orderObject.phone),
       city: String(orderObject.city),
       address: String(orderObject.address),
-      email: String(orderObject.email),
+      email: orderObject.email ? String(orderObject.email) : undefined,
       size: String(orderObject.size),
       items: orderObject.items as Array<{
         name: string;

@@ -40,7 +40,7 @@ const orderSchema = new Schema(
     phone: { type: String, required: true, trim: true },
     city: { type: String, required: true },
     address: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
+    email: { type: String, trim: true, lowercase: true },
     size: { type: String, enum: ["S", "M", "L"], required: true },
     items: { type: [orderItemSchema], default: [] },
     subtotal: { type: Number, required: true },

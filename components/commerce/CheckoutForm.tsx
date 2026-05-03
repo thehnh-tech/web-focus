@@ -80,7 +80,7 @@ export function CheckoutForm() {
 
       <div className="checkout-layout">
         <form className="checkout-form" onSubmit={handleSubmit}>
-          <p className="required-note">Tous les champs sont obligatoires.</p>
+          <p className="required-note">L’email est optionnel. Les autres champs sont obligatoires.</p>
           <div className="checkout-step">
             <h2>Contact</h2>
             <div className="form-grid two-cols">
@@ -110,12 +110,11 @@ export function CheckoutForm() {
               </div>
               <div className="field">
                 <label htmlFor="email">
-                  Email <span aria-hidden="true">*</span>
+                  Email <small>(optionnel)</small>
                 </label>
                 <input
                   id="email"
                   onChange={(event) => updateField("email", event.target.value)}
-                  required
                   type="email"
                   value={form.email}
                 />

@@ -1747,6 +1747,35 @@ tr:last-child td {
   font-weight: 600;
 }
 
+.admin-order-footer {
+  align-items: center;
+  display: flex !important;
+  justify-content: space-between;
+}
+
+.admin-order-footer div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-delete-order {
+  background: #ffffff;
+  border: 1px solid var(--destructive);
+  border-radius: var(--radius-sm);
+  color: var(--destructive);
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 40px;
+  padding: 0 12px;
+  text-transform: uppercase;
+}
+
+.admin-delete-order:hover {
+  background: var(--destructive);
+  color: #ffffff;
+}
+
 .admin-empty-orders {
   border: 1px dashed #d4d4d4;
   border-radius: var(--radius-lg);

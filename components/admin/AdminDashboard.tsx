@@ -27,7 +27,7 @@ type Order = {
   phone: string;
   city: string;
   address: string;
-  email: string;
+  email?: string;
   size: string;
   items: Array<{ name: string; quantity: number; size: string; price: number }>;
   subtotal: number;
@@ -105,6 +105,7 @@ export function AdminDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRestoringOffers, setIsRestoringOffers] = useState(false);
   const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
 
   const isEditing = Boolean(form.id);
 
@@ -267,6 +268,37 @@ export function AdminDashboard() {
     }
   }
 
+  async function deleteOrder(order: Order) {
+    const confirmed = window.confirm(
+      `Supprimer définitivement la commande #${order.id.slice(-6).toUpperCase()} ?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+    setDeletingOrderId(order.id);
+
+    try {
+      const response = await fetch(`/api/orders/${order.id}`, { method: "DELETE" });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setError(data?.error || "Impossible de supprimer la commande.");
+        return;
+      }
+
+      setOrders((current) => current.filter((item) => item.id !== order.id));
+      setMessage("Commande supprimée.");
+    } catch {
+      setError("Impossible de supprimer la commande.");
+    } finally {
+      setDeletingOrderId(null);
+    }
+  }
+
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
@@ -343,7 +375,11 @@ export function AdminDashboard() {
                     <span>Client</span>
                     <strong>{order.fullName}</strong>
                     <a href={`tel:${order.phone}`}>{order.phone}</a>
-                    <a href={`mailto:${order.email}`}>{order.email}</a>
+                    {order.email ? (
+                      <a href={`mailto:${order.email}`}>{order.email}</a>
+                    ) : (
+                      <p>Email non renseigné</p>
+                    )}
                   </div>
                   <div>
                     <span>Livraison</span>
@@ -362,9 +398,19 @@ export function AdminDashboard() {
                   ))}
                 </div>
 
-                <footer>
-                  <span>Livraison : {formatPrice(Number(order.deliveryFee || 0))}</span>
-                  <strong>Total : {formatPrice(Number(order.total || 0))}</strong>
+                <footer className="admin-order-footer">
+                  <div>
+                    <span>Livraison : {formatPrice(Number(order.deliveryFee || 0))}</span>
+                    <strong>Total : {formatPrice(Number(order.total || 0))}</strong>
+                  </div>
+                  <button
+                    className="admin-delete-order"
+                    disabled={deletingOrderId === order.id}
+                    onClick={() => deleteOrder(order)}
+                    type="button"
+                  >
+                    {deletingOrderId === order.id ? "Suppression..." : "Supprimer"}
+                  </button>
                 </footer>
               </article>
             ))}

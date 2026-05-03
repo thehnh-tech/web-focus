@@ -14,7 +14,7 @@ type OrderEmailInput = {
   phone: string;
   city: string;
   address: string;
-  email: string;
+  email?: string;
   size: string;
   items: OrderEmailItem[];
   subtotal: number;
@@ -82,7 +82,7 @@ function buildOrderEmail(order: OrderEmailInput) {
         <h2 style="font-size:14px;text-transform:uppercase;margin:0 0 12px;">Client</h2>
         <p style="margin:0;"><strong>${escapeHtml(order.fullName)}</strong></p>
         <p style="margin:0;">Téléphone : ${escapeHtml(order.phone)}</p>
-        <p style="margin:0;">Email : ${escapeHtml(order.email)}</p>
+        <p style="margin:0;">Email : ${order.email ? escapeHtml(order.email) : "Non renseigné"}</p>
       </div>
 
       <div style="display:block;padding:18px;border:1px solid #e5e5e5;border-radius:8px;margin-bottom:18px;">
@@ -145,13 +145,16 @@ export async function sendOrderNotification(order: OrderEmailInput) {
   }
 
   const resend = new Resend(apiKey);
-  const { data, error } = await resend.emails.send({
+  const emailPayload = {
     from,
     to: [to],
-    replyTo: order.email,
     subject: `FocusGym - Nouveau bon de commande #${order.id.slice(-6).toUpperCase()}`,
     html: buildOrderEmail(order)
-  });
+  };
+
+  const { data, error } = await resend.emails.send(
+    order.email ? { ...emailPayload, replyTo: order.email } : emailPayload
+  );
 
   if (error) {
     throw new Error(JSON.stringify(error));

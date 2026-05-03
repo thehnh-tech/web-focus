@@ -40,3 +40,26 @@ export async function PATCH(request: Request, context: Context) {
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(_request: Request, context: Context) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (!hasMongoUri()) {
+    return NextResponse.json(
+      { error: "MONGODB_URI must be configured to delete orders." },
+      { status: 503 }
+    );
+  }
+
+  const { id } = await context.params;
+  await connectToDatabase();
+  const deleted = await OrderModel.findByIdAndDelete(id).lean();
+
+  if (!deleted) {
+    return NextResponse.json({ error: "Commande introuvable." }, { status: 404 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

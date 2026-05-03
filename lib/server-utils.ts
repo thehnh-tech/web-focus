@@ -145,7 +145,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
   const size = String(body.size ?? "").trim();
   const rawItems = Array.isArray(body.items) ? body.items : [];
 
-  if (!fullName || !phone || !city || !address || !email || !size) {
+  if (!fullName || !phone || !city || !address || !size) {
     return { error: "Tous les champs de commande sont obligatoires." };
   }
 
@@ -157,7 +157,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
     return { error: "Taille invalide." };
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "Email invalide." };
   }
 
