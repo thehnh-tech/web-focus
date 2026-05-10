@@ -1,6 +1,6 @@
 import type { Product, ProductCategory } from "@/lib/types";
 import { OfferModel } from "@/lib/models";
-import { fallbackProducts, governorates, orderSizes } from "@/lib/products";
+import { DELIVERY_FEE, fallbackProducts, governorates, orderSizes } from "@/lib/products";
 
 export const productCategories: ProductCategory[] = [
   "Compression Tops",
@@ -197,7 +197,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
   }
 
   const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-  const deliveryFee = 7;
+  const deliveryFee = DELIVERY_FEE;
 
   return {
     data: {

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { fallbackProducts, formatPrice } from "@/lib/products";
+import { fallbackProducts, formatDeliveryFee, formatPrice } from "@/lib/products";
 import type { Product, ProductCategory } from "@/lib/types";
 
 type OfferForm = {
@@ -400,7 +400,7 @@ export function AdminDashboard() {
 
                 <footer className="admin-order-footer">
                   <div>
-                    <span>Livraison : {formatPrice(Number(order.deliveryFee || 0))}</span>
+                    <span>Livraison : {formatDeliveryFee(Number(order.deliveryFee || 0))}</span>
                     <strong>Total : {formatPrice(Number(order.total || 0))}</strong>
                   </div>
                   <button

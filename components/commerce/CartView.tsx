@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { DELIVERY_FEE, formatColor, formatPrice } from "@/lib/products";
+import { DELIVERY_FEE, formatColor, formatDeliveryFee, formatPrice } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
 export function CartView() {
@@ -81,7 +81,7 @@ export function CartView() {
           </div>
           <div>
             <span>Livraison</span>
-            <strong>{formatPrice(DELIVERY_FEE)}</strong>
+            <strong>{formatDeliveryFee(DELIVERY_FEE)}</strong>
           </div>
           <div className="summary-total">
             <span>Total</span>

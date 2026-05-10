@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { DELIVERY_FEE, formatPrice, governorates, orderSizes } from "@/lib/products";
+import {
+  DELIVERY_FEE,
+  formatDeliveryFee,
+  formatPrice,
+  governorates,
+  orderSizes
+} from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
 type FormState = {
@@ -74,7 +80,7 @@ export function CheckoutForm() {
         <h1>Finaliser</h1>
         <p>
           Le paiement à la livraison est disponible partout en Tunisie. La
-          livraison coûte 7 DT et sera confirmée par notre équipe.
+          livraison est gratuite et sera confirmée par notre équipe.
         </p>
       </div>
 
@@ -209,7 +215,7 @@ export function CheckoutForm() {
           </div>
           <div>
             <span>Livraison</span>
-            <strong>{items.length > 0 ? formatPrice(DELIVERY_FEE) : formatPrice(0)}</strong>
+            <strong>{formatDeliveryFee(items.length > 0 ? DELIVERY_FEE : 0)}</strong>
           </div>
           <div className="summary-total">
             <span>Total</span>

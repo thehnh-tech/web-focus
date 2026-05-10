@@ -1,6 +1,6 @@
 import type { Product } from "@/lib/types";
 
-export const DELIVERY_FEE = 7;
+export const DELIVERY_FEE = 0;
 
 export const governorates = [
   "Tunis",
@@ -82,6 +82,10 @@ export const fallbackProducts: Product[] = [
 
 export function formatPrice(value: number) {
   return `${value.toFixed(1)} DT`;
+}
+
+export function formatDeliveryFee(value = DELIVERY_FEE) {
+  return value > 0 ? formatPrice(value) : "Gratuite";
 }
 
 export function formatColor(value?: string) {

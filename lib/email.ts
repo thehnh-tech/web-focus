@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { formatPrice } from "@/lib/products";
+import { formatDeliveryFee, formatPrice } from "@/lib/products";
 
 type OrderEmailItem = {
   name: string;
@@ -107,7 +107,7 @@ function buildOrderEmail(order: OrderEmailInput) {
 
       <div style="padding:18px;background:#f5f5f5;border-radius:8px;">
         <p style="margin:0;">Sous-total : <strong>${formatPrice(order.subtotal)}</strong></p>
-        <p style="margin:0;">Livraison : <strong>${formatPrice(order.deliveryFee)}</strong></p>
+        <p style="margin:0;">Livraison : <strong>${formatDeliveryFee(order.deliveryFee)}</strong></p>
         <p style="margin:8px 0 0;font-size:18px;">Total : <strong>${formatPrice(order.total)}</strong></p>
       </div>
     </div>

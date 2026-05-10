@@ -44,7 +44,7 @@ const orderSchema = new Schema(
     size: { type: String, enum: ["S", "M", "L"], required: true },
     items: { type: [orderItemSchema], default: [] },
     subtotal: { type: Number, required: true },
-    deliveryFee: { type: Number, required: true, default: 7 },
+    deliveryFee: { type: Number, required: true, default: 0 },
     total: { type: Number, required: true },
     paymentMethod: { type: String, default: "Paiement à la livraison" },
     status: {
