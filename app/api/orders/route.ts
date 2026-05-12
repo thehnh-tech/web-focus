@@ -52,13 +52,14 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as Record<string, unknown>;
-  const validated = validateOrderPayload(body);
+
+  await connectToDatabase();
+  const validated = await validateOrderPayload(body);
 
   if ("error" in validated) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
-  await connectToDatabase();
   const created = await OrderModel.create(validated.data);
   const orderObject = created.toObject() as Record<string, unknown>;
 

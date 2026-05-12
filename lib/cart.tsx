@@ -56,6 +56,65 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [hasHydrated, items]);
 
+  useEffect(() => {
+    if (!hasHydrated || items.length === 0) {
+      return;
+    }
+
+    let isMounted = true;
+
+    fetch("/api/offers", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (!isMounted || !Array.isArray(data?.offers)) {
+          return;
+        }
+
+        const products = data.offers as Product[];
+        const productsById = new Map(products.map((product) => [product.id, product]));
+        const productsBySlug = new Map(products.map((product) => [product.slug, product]));
+
+        setItems((currentItems) => {
+          let hasChanges = false;
+          const nextItems = currentItems.map((item) => {
+            const product = productsById.get(item.productId) ?? productsBySlug.get(item.slug);
+
+            if (!product) {
+              return item;
+            }
+
+            const nextItem = {
+              ...item,
+              productId: product.id,
+              slug: product.slug,
+              name: product.name,
+              price: product.price,
+              image: product.image,
+              color: product.color
+            };
+
+            hasChanges =
+              hasChanges ||
+              nextItem.productId !== item.productId ||
+              nextItem.slug !== item.slug ||
+              nextItem.name !== item.name ||
+              nextItem.price !== item.price ||
+              nextItem.image !== item.image ||
+              nextItem.color !== item.color;
+
+            return nextItem;
+          });
+
+          return hasChanges ? nextItems : currentItems;
+        });
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hasHydrated, items.length]);
+
   const addToCart = useCallback(({ product, size = "M", quantity = 1 }: AddToCartInput) => {
     setItems((currentItems) => {
       const nextItem: CartItem = {

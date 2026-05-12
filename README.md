@@ -51,7 +51,7 @@ Checkout creates MongoDB orders with:
 - email
 - size
 - cart items
-- 7 DT delivery fee
+- free delivery
 - cash on delivery
 - Resend email notification when email variables are configured
 

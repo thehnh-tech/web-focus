@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/commerce/ProductDetail";
-import { fallbackProducts, getProductBySlug } from "@/lib/products";
+import { getProductBySlug } from "@/lib/products";
 import { connectToDatabase, hasMongoUri } from "@/lib/mongodb";
 import { OfferModel } from "@/lib/models";
 import { serializeOffer } from "@/lib/server-utils";
@@ -11,19 +11,23 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return fallbackProducts.map((product) => ({ slug: product.slug }));
-}
+export const dynamic = "force-dynamic";
 
 async function findProduct(slug: string): Promise<Product | undefined> {
-  const fallbackProduct = getProductBySlug(slug);
-  if (fallbackProduct || !hasMongoUri()) {
-    return fallbackProduct;
+  if (hasMongoUri()) {
+    await connectToDatabase();
+    const offer = await OfferModel.findOne({ slug }).lean();
+
+    if (offer) {
+      return serializeOffer(offer as Record<string, unknown>);
+    }
+
+    if (await OfferModel.exists({})) {
+      return undefined;
+    }
   }
 
-  await connectToDatabase();
-  const offer = await OfferModel.findOne({ slug }).lean();
-  return offer ? serializeOffer(offer as Record<string, unknown>) : undefined;
+  return getProductBySlug(slug);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

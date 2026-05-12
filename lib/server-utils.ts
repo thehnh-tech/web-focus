@@ -7,6 +7,21 @@ export const productCategories: ProductCategory[] = [
   "Sets"
 ];
 
+const objectIdPattern = /^[a-f\d]{24}$/i;
+
+type ParsedOrderItem = {
+  productId: string;
+  slug: string;
+  size: string;
+  quantity: number;
+};
+
+type OfficialOrderItem = ParsedOrderItem & {
+  name: string;
+  price: number;
+  color?: string;
+};
+
 export function slugify(value: string) {
   return value
     .toLowerCase()
@@ -136,7 +151,59 @@ export async function restoreFallbackOffers() {
   return result.upsertedCount;
 }
 
-export function validateOrderPayload(body: Record<string, unknown>) {
+async function resolveOfficialOrderItems(items: ParsedOrderItem[]) {
+  const slugs = Array.from(new Set(items.map((item) => item.slug).filter(Boolean)));
+  const objectIds = Array.from(
+    new Set(items.map((item) => item.productId).filter((id) => objectIdPattern.test(id)))
+  );
+  const filters = [
+    ...(slugs.length > 0 ? [{ slug: { $in: slugs } }] : []),
+    ...(objectIds.length > 0 ? [{ _id: { $in: objectIds } }] : [])
+  ];
+  const offers =
+    filters.length > 0
+      ? await OfferModel.find({ $or: filters }).lean()
+      : [];
+  const officialProducts = offers.map((offer) =>
+    serializeOffer(offer as Record<string, unknown>)
+  );
+  const useFallbackProducts =
+    officialProducts.length === 0 && !(await OfferModel.exists({}));
+  const productsById = new Map(officialProducts.map((product) => [product.id, product]));
+  const productsBySlug = new Map(officialProducts.map((product) => [product.slug, product]));
+  const fallbackProductsById = new Map(fallbackProducts.map((product) => [product.id, product]));
+  const fallbackProductsBySlug = new Map(
+    fallbackProducts.map((product) => [product.slug, product])
+  );
+  const officialItems: OfficialOrderItem[] = [];
+
+  for (const item of items) {
+    const product =
+      productsById.get(item.productId) ??
+      productsBySlug.get(item.slug) ??
+      (useFallbackProducts
+        ? fallbackProductsById.get(item.productId) ?? fallbackProductsBySlug.get(item.slug)
+        : undefined);
+
+    if (!product) {
+      return { error: "Produit indisponible dans le panier." };
+    }
+
+    officialItems.push({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: product.price,
+      color: product.color,
+      size: item.size,
+      quantity: item.quantity
+    });
+  }
+
+  return { items: officialItems };
+}
+
+export async function validateOrderPayload(body: Record<string, unknown>) {
   const fullName = String(body.fullName ?? "").trim();
   const phone = String(body.phone ?? "").trim();
   const city = String(body.city ?? "").trim();
@@ -168,14 +235,10 @@ export function validateOrderPayload(body: Record<string, unknown>) {
   const items = rawItems.map((item) => {
     const record = item as Record<string, unknown>;
     const quantity = Number(record.quantity);
-    const price = Number(record.price);
 
     return {
       productId: String(record.productId ?? ""),
       slug: String(record.slug ?? ""),
-      name: String(record.name ?? ""),
-      price,
-      color: record.color ? String(record.color) : undefined,
       size: String(record.size ?? size),
       quantity
     };
@@ -184,11 +247,8 @@ export function validateOrderPayload(body: Record<string, unknown>) {
   if (
     items.some(
       (item) =>
-        !item.productId ||
-        !item.slug ||
-        !item.name ||
-        !Number.isFinite(item.price) ||
-        item.price <= 0 ||
+        (!item.productId && !item.slug) ||
+        !orderSizes.includes(item.size as (typeof orderSizes)[number]) ||
         !Number.isInteger(item.quantity) ||
         item.quantity < 1
     )
@@ -196,7 +256,13 @@ export function validateOrderPayload(body: Record<string, unknown>) {
     return { error: "Produit invalide dans le panier." };
   }
 
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const resolved = await resolveOfficialOrderItems(items);
+
+  if ("error" in resolved) {
+    return { error: resolved.error };
+  }
+
+  const subtotal = resolved.items.reduce((total, item) => total + item.price * item.quantity, 0);
   const deliveryFee = DELIVERY_FEE;
 
   return {
@@ -207,7 +273,7 @@ export function validateOrderPayload(body: Record<string, unknown>) {
       address,
       email,
       size,
-      items,
+      items: resolved.items,
       subtotal,
       deliveryFee,
       total: subtotal + deliveryFee,
