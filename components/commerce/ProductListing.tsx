@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/commerce/ProductCard";
 type SortMode = "Featured" | "Price: Low to High" | "Price: High to Low" | "Newest";
 type FilterMode = "All" | ProductCategory;
 
-const shopCategories: ProductCategory[] = ["Compression Tops", "Sets"];
+const shopCategories: ProductCategory[] = ["Compression Tops", "Sets", "Oversize"];
 const filters: FilterMode[] = ["All", ...shopCategories];
 const sorts: SortMode[] = [
   "Featured",
@@ -19,7 +19,7 @@ const sorts: SortMode[] = [
 
 const filterLabels: Record<FilterMode, string> = {
   All: "Tous",
-  "Compression Tops": "Compression",
+  "Compression Tops": "Compression", "Oversize",
   Sets: "Packs"
 };
 
