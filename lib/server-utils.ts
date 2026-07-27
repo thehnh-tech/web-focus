@@ -4,7 +4,8 @@ import { DELIVERY_FEE, fallbackProducts, governorates, orderSizes } from "@/lib/
 
 export const productCategories: ProductCategory[] = [
   "Compression Tops",
-  "Sets"
+  "Sets",
+  "Oversize"
 ];
 
 const objectIdPattern = /^[a-f\d]{24}$/i;
