@@ -19,9 +19,11 @@ const sorts: SortMode[] = [
 
 const filterLabels: Record<FilterMode, string> = {
   All: "Tous",
-  "Compression Tops": "Compression", "Oversize",
+  "Compression Tops": "Compression",
+  Oversize: "Oversize",
   Sets: "Packs"
 };
+
 
 const sortLabels: Record<SortMode, string> = {
   Featured: "Sélection",
