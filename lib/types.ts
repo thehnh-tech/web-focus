@@ -1,4 +1,4 @@
-export type ProductCategory = "Compression Tops" | "Sets";
+export type ProductCategory = "Compression Tops" | "Sets" | "Oversize";
 
 export type Product = {
   id: string;
