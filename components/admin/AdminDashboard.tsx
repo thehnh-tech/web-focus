@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { fallbackProducts, formatDeliveryFee, formatPrice } from "@/lib/products";
-import type { Product, ProductCategory } from "@/lib/types";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { formatDeliveryFee, formatPrice } from "@/lib/products";
+import type { Category, Product } from "@/lib/types";
 
 type OfferForm = {
   id?: string;
@@ -12,7 +11,7 @@ type OfferForm = {
   name: string;
   price: string;
   oldPrice: string;
-  category: ProductCategory;
+  category: string;
   image: string;
   secondaryImage: string;
   alt: string;
@@ -42,8 +41,8 @@ const emptyForm: OfferForm = {
   name: "",
   price: "",
   oldPrice: "",
-  category: "Compression Tops",
-  image: "/images/black-front.png",
+  category: "",
+  image: "",
   secondaryImage: "",
   alt: "",
   color: "",
@@ -58,11 +57,6 @@ const statusLabels: Record<Order["status"], string> = {
   confirmed: "Confirmée",
   delivered: "Livrée",
   cancelled: "Annulée"
-};
-
-const categoryLabels: Record<ProductCategory, string> = {
-  "Compression Tops": "Compression",
-  Sets: "Packs"
 };
 
 function productToForm(product: Product): OfferForm {
@@ -94,69 +88,219 @@ function formatOrderDate(value: string) {
   }).format(date);
 }
 
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+  required = false,
+  disabled = false,
+  onUploadingChange
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  disabled?: boolean;
+  onUploadingChange?: (uploading: boolean) => void;
+}) {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const aliveRef = useRef(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
+
+  async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setIsUploading(true);
+    onUploadingChange?.(true);
+    setUploadError("");
+
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      const response = await fetch("/api/upload", { method: "POST", body: data });
+      const result = await response.json().catch(() => null);
+
+      if (!aliveRef.current) {
+        return;
+      }
+
+      if (!response.ok || !result?.url) {
+        setUploadError(result?.error || "Upload impossible.");
+        return;
+      }
+
+      onChange(result.url);
+    } catch {
+      if (aliveRef.current) {
+        setUploadError("Upload impossible. Vérifiez votre connexion.");
+      }
+    } finally {
+      onUploadingChange?.(false);
+
+      if (aliveRef.current) {
+        setIsUploading(false);
+      }
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
+  }
+
+  return (
+    <div className="admin-upload-field admin-full">
+      <label className="admin-upload-label" htmlFor={inputId}>
+        {label}
+      </label>
+      <div className="admin-upload-row">
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img alt="" className="admin-upload-preview" src={value} />
+        ) : (
+          <span className="admin-upload-placeholder" aria-hidden="true">
+            IMG
+          </span>
+        )}
+        <div className="admin-upload-main">
+          <div className="admin-upload-actions">
+            <button
+              className="btn-secondary"
+              disabled={disabled || isUploading}
+              onClick={() => inputRef.current?.click()}
+              type="button"
+            >
+              {isUploading
+                ? "Upload en cours..."
+                : value
+                  ? "Remplacer l’image"
+                  : "Uploader une image"}
+            </button>
+            {value ? (
+              <button
+                className="admin-upload-clear"
+                disabled={disabled || isUploading}
+                onClick={() => onChange("")}
+                type="button"
+              >
+                Retirer
+              </button>
+            ) : null}
+          </div>
+          <input
+            className="admin-input"
+            disabled={disabled || isUploading}
+            id={inputId}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder="ou collez une URL d’image"
+            required={required}
+            value={value}
+          />
+        </div>
+      </div>
+      <input
+        accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+        hidden
+        onChange={handleFile}
+        ref={inputRef}
+        type="file"
+      />
+      {uploadError ? <p className="form-error">{uploadError}</p> : null}
+    </div>
+  );
+}
+
 export function AdminDashboard() {
   const router = useRouter();
-  const [offers, setOffers] = useState<Product[]>(fallbackProducts);
+  const [offers, setOffers] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [form, setForm] = useState<OfferForm>(emptyForm);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isRestoringOffers, setIsRestoringOffers] = useState(false);
+  const [isLoadingOffers, setIsLoadingOffers] = useState(true);
   const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null);
   const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState("");
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [pendingUploads, setPendingUploads] = useState(0);
 
   const isEditing = Boolean(form.id);
 
+  async function loadCategories() {
+    try {
+      const response = await fetch("/api/categories", { cache: "no-store" });
+
+      if (response.ok) {
+        const data = await response.json().catch(() => null);
+        if (Array.isArray(data?.categories)) {
+          setCategories(data.categories);
+        }
+      }
+    } catch {
+      setError("Impossible d’actualiser les catégories. Cliquez sur Actualiser.");
+    }
+  }
+
   async function loadData() {
     setIsRefreshing(true);
-    const [offersResponse, ordersResponse] = await Promise.all([
-      fetch("/api/offers", { cache: "no-store" }),
-      fetch("/api/orders", { cache: "no-store" })
-    ]);
 
-    if (offersResponse.ok) {
-      const data = await offersResponse.json();
+    try {
+      const [offersResponse, ordersResponse] = await Promise.all([
+        fetch("/api/offers", { cache: "no-store" }),
+        fetch("/api/orders", { cache: "no-store" }),
+        loadCategories()
+      ]);
 
-      if (data?.source === "fallback") {
-        try {
-          const restoreResponse = await fetch("/api/offers/restore-defaults", {
-            method: "POST"
-          });
-          const restoredData = await restoreResponse.json().catch(() => null);
-
-          if (restoreResponse.ok && Array.isArray(restoredData?.offers)) {
-            setOffers(restoredData.offers);
-          } else if (Array.isArray(data.offers)) {
-            setOffers(data.offers);
-          }
-        } catch {
-          if (Array.isArray(data.offers)) {
-            setOffers(data.offers);
-          }
+      if (offersResponse.ok) {
+        const data = await offersResponse.json().catch(() => null);
+        if (Array.isArray(data?.offers)) {
+          setOffers(data.offers);
         }
-      } else if (Array.isArray(data.offers)) {
-        setOffers(data.offers);
       }
-    }
 
-    if (ordersResponse.ok) {
-      const data = await ordersResponse.json();
-      if (Array.isArray(data.orders)) {
-        setOrders(data.orders);
+      if (ordersResponse.ok) {
+        const data = await ordersResponse.json().catch(() => null);
+        if (Array.isArray(data?.orders)) {
+          setOrders(data.orders);
+        }
       }
+    } catch {
+      setError("Impossible de charger les données admin.");
+    } finally {
+      setIsRefreshing(false);
+      setIsLoadingOffers(false);
     }
-
-    setIsRefreshing(false);
   }
 
   useEffect(() => {
-    loadData().catch(() => {
-      setError("Impossible de charger les données admin.");
-      setIsRefreshing(false);
-    });
+    void loadData();
   }, []);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      setForm((current) =>
+        current.category ? current : { ...current, category: categories[0].name }
+      );
+    }
+  }, [categories]);
 
   const stats = useMemo(() => {
     const revenue = orders.reduce((total, order) => total + Number(order.total || 0), 0);
@@ -180,30 +324,41 @@ export function AdminDashboard() {
     const endpoint = isEditing ? `/api/offers/${encodeURIComponent(form.id ?? "")}` : "/api/offers";
     const method = isEditing ? "PUT" : "POST";
 
-    const response = await fetch(endpoint, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        price: Number(form.price),
-        oldPrice: form.oldPrice ? Number(form.oldPrice) : undefined
-      })
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          price: Number(form.price),
+          oldPrice: form.oldPrice ? Number(form.oldPrice) : undefined
+        })
+      });
 
-    const data = await response.json().catch(() => null);
-    setIsSaving(false);
+      const data = await response.json().catch(() => null);
 
-    if (!response.ok) {
-      setError(data?.error || "Impossible d’enregistrer l’offre.");
-      return;
+      if (!response.ok) {
+        setError(data?.error || "Impossible d’enregistrer le produit.");
+        return;
+      }
+
+      setMessage(isEditing ? "Produit mis à jour." : "Produit créé.");
+      setForm({ ...emptyForm, category: categories[0]?.name ?? "" });
+      await loadData();
+    } catch {
+      setError("Impossible d’enregistrer le produit. Vérifiez votre connexion.");
+    } finally {
+      setIsSaving(false);
     }
-
-    setMessage(isEditing ? "Offre mise à jour." : "Offre créée.");
-    setForm(emptyForm);
-    await loadData();
   }
 
   async function deleteOffer(product: Product) {
+    const confirmed = window.confirm(`Supprimer définitivement « ${product.name} » ?`);
+
+    if (!confirmed) {
+      return;
+    }
+
     setMessage("");
     setError("");
     setDeletingOfferId(product.id);
@@ -215,42 +370,107 @@ export function AdminDashboard() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        setError(data?.error || "Impossible de supprimer l’offre.");
+        setError(data?.error || "Impossible de supprimer le produit.");
         return;
       }
 
-      setMessage("Offre supprimée.");
+      setMessage("Produit supprimé.");
+      setForm((current) =>
+        current.id === product.id
+          ? { ...emptyForm, category: categories[0]?.name ?? "" }
+          : current
+      );
       await loadData();
     } catch {
-      setError("Impossible de supprimer l’offre.");
+      setError("Impossible de supprimer le produit.");
     } finally {
       setDeletingOfferId(null);
     }
   }
 
-  async function restoreInitialOffers() {
+  async function createCategory(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setMessage("");
     setError("");
-    setIsRestoringOffers(true);
+    setIsSavingCategory(true);
 
     try {
-      const response = await fetch("/api/offers/restore-defaults", { method: "POST" });
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCategoryName })
+      });
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        setError(data?.error || "Impossible de restaurer les offres initiales.");
+        setError(data?.error || "Impossible de créer la catégorie.");
         return;
       }
 
-      if (Array.isArray(data?.offers)) {
-        setOffers(data.offers);
+      setNewCategoryName("");
+      setMessage("Catégorie créée.");
+      await loadCategories();
+    } catch {
+      setError("Impossible de créer la catégorie.");
+    } finally {
+      setIsSavingCategory(false);
+    }
+  }
+
+  async function renameCategory(category: Category) {
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch(`/api/categories/${encodeURIComponent(category.id)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editingCategoryName })
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(data?.error || "Impossible de renommer la catégorie.");
+        return;
       }
 
-      setMessage("Offres initiales restaurées.");
+      setEditingCategoryId(null);
+      setEditingCategoryName("");
+      setMessage("Catégorie mise à jour.");
+      await loadData();
     } catch {
-      setError("Impossible de restaurer les offres initiales.");
+      setError("Impossible de renommer la catégorie.");
+    }
+  }
+
+  async function deleteCategory(category: Category) {
+    const confirmed = window.confirm(`Supprimer la catégorie « ${category.name} » ?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+    setDeletingCategoryId(category.id);
+
+    try {
+      const response = await fetch(`/api/categories/${encodeURIComponent(category.id)}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setError(data?.error || "Impossible de supprimer la catégorie.");
+        return;
+      }
+
+      setMessage("Catégorie supprimée.");
+      await loadCategories();
+    } catch {
+      setError("Impossible de supprimer la catégorie.");
     } finally {
-      setIsRestoringOffers(false);
+      setDeletingCategoryId(null);
     }
   }
 
@@ -423,9 +643,95 @@ export function AdminDashboard() {
         )}
       </div>
 
+      <div className="admin-panel">
+        <div className="admin-section-head">
+          <div>
+            <h2>Catégories</h2>
+            <p>Ajoutez, renommez ou supprimez les catégories de la boutique.</p>
+          </div>
+        </div>
+
+        <form className="admin-category-form" onSubmit={createCategory}>
+          <input
+            className="admin-input"
+            onChange={(event) => setNewCategoryName(event.target.value)}
+            placeholder="Nouvelle catégorie (ex. Leggings)"
+            required
+            value={newCategoryName}
+          />
+          <button className="btn-secondary" disabled={isSavingCategory} type="submit">
+            {isSavingCategory ? "Ajout..." : "Ajouter"}
+          </button>
+        </form>
+
+        {categories.length > 0 ? (
+          <div className="admin-category-list">
+            {categories.map((category) => (
+              <article className="admin-category-row" key={category.id}>
+                {editingCategoryId === category.id ? (
+                  <>
+                    <input
+                      aria-label={`Renommer la catégorie ${category.name}`}
+                      className="admin-input"
+                      onChange={(event) => setEditingCategoryName(event.target.value)}
+                      value={editingCategoryName}
+                    />
+                    <button
+                      onClick={() => renameCategory(category)}
+                      type="button"
+                    >
+                      Enregistrer
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCategoryId(null);
+                        setEditingCategoryName("");
+                      }}
+                      type="button"
+                    >
+                      Annuler
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <strong>{category.name}</strong>
+                      <span>
+                        {category.productCount ?? 0} produit
+                        {(category.productCount ?? 0) > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingCategoryId(category.id);
+                        setEditingCategoryName(category.name);
+                      }}
+                      type="button"
+                    >
+                      Renommer
+                    </button>
+                    <button
+                      disabled={deletingCategoryId === category.id}
+                      onClick={() => deleteCategory(category)}
+                      type="button"
+                    >
+                      {deletingCategoryId === category.id ? "Suppression..." : "Supprimer"}
+                    </button>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="admin-category-empty">
+            Aucune catégorie pour le moment. Créez-en une pour pouvoir ajouter des produits.
+          </p>
+        )}
+      </div>
+
       <div className="admin-layout">
         <form className="admin-panel" onSubmit={handleSubmit}>
-          <h2>{isEditing ? "Modifier l’offre" : "Ajouter une offre"}</h2>
+          <h2>{isEditing ? "Modifier le produit" : "Ajouter un produit"}</h2>
           <div className="admin-form-grid">
             <input
               className="admin-input"
@@ -437,8 +743,7 @@ export function AdminDashboard() {
             <input
               className="admin-input"
               onChange={(event) => updateForm("slug", event.target.value)}
-              placeholder="slug-produit"
-              required
+              placeholder="slug-produit (auto si vide)"
               value={form.slug}
             />
             <input
@@ -462,11 +767,23 @@ export function AdminDashboard() {
             />
             <select
               className="admin-input"
-              onChange={(event) => updateForm("category", event.target.value as ProductCategory)}
+              disabled={categories.length === 0}
+              onChange={(event) => updateForm("category", event.target.value)}
+              required
               value={form.category}
             >
-              <option value="Compression Tops">Compression</option>
-              <option value="Sets">Packs</option>
+              {categories.length === 0 ? (
+                <option value="">Créez d’abord une catégorie</option>
+              ) : null}
+              {form.category &&
+              !categories.some((category) => category.name === form.category) ? (
+                <option value={form.category}>{form.category} (supprimée)</option>
+              ) : null}
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
             </select>
             <input
               className="admin-input"
@@ -474,17 +791,25 @@ export function AdminDashboard() {
               placeholder="Couleur"
               value={form.color}
             />
-            <input
-              className="admin-input"
-              onChange={(event) => updateForm("image", event.target.value)}
-              placeholder="/images/black-front.png"
+            <ImageUploadField
+              disabled={isSaving}
+              key={`image-${form.id ?? "new"}`}
+              label="Image principale"
+              onChange={(value) => updateForm("image", value)}
+              onUploadingChange={(uploading) =>
+                setPendingUploads((count) => count + (uploading ? 1 : -1))
+              }
               required
               value={form.image}
             />
-            <input
-              className="admin-input"
-              onChange={(event) => updateForm("secondaryImage", event.target.value)}
-              placeholder="/images/black-back.png"
+            <ImageUploadField
+              disabled={isSaving}
+              key={`secondary-${form.id ?? "new"}`}
+              label="Image secondaire (optionnelle)"
+              onChange={(value) => updateForm("secondaryImage", value)}
+              onUploadingChange={(uploading) =>
+                setPendingUploads((count) => count + (uploading ? 1 : -1))
+              }
               value={form.secondaryImage}
             />
             <input
@@ -511,11 +836,25 @@ export function AdminDashboard() {
             />
           </div>
           <div className="admin-actions">
-            <button className="buy-button" disabled={isSaving} type="submit">
-              {isSaving ? "Enregistrement..." : isEditing ? "Mettre à jour" : "Ajouter l’offre"}
+            <button
+              className="buy-button"
+              disabled={isSaving || pendingUploads > 0 || categories.length === 0}
+              type="submit"
+            >
+              {pendingUploads > 0
+                ? "Upload en cours..."
+                : isSaving
+                  ? "Enregistrement..."
+                  : isEditing
+                    ? "Mettre à jour"
+                    : "Ajouter le produit"}
             </button>
             {isEditing ? (
-              <button className="btn-secondary" onClick={() => setForm(emptyForm)} type="button">
+              <button
+                className="btn-secondary"
+                onClick={() => setForm({ ...emptyForm, category: categories[0]?.name ?? "" })}
+                type="button"
+              >
                 Annuler
               </button>
             ) : null}
@@ -524,37 +863,40 @@ export function AdminDashboard() {
 
         <div className="admin-panel">
           <div className="admin-section-head">
-            <h2>Offres</h2>
-            <button
-              className="btn-secondary"
-              disabled={isRestoringOffers}
-              onClick={restoreInitialOffers}
-              type="button"
-            >
-              {isRestoringOffers ? "Restauration..." : "Restaurer offres initiales"}
-            </button>
+            <h2>Produits</h2>
           </div>
-          <div className="admin-offers-list">
-            {offers.map((product) => (
-              <article className="admin-offer-row" key={product.id}>
-                <Image alt={product.alt} height={64} src={product.image} width={64} />
-                <div>
-                  <strong>{product.name}</strong>
-                  <span>{categoryLabels[product.category]} / {formatPrice(product.price)}</span>
-                </div>
-                <button onClick={() => setForm(productToForm(product))} type="button">
-                  Modifier
-                </button>
-                <button
-                  disabled={deletingOfferId === product.id}
-                  onClick={() => deleteOffer(product)}
-                  type="button"
-                >
-                  {deletingOfferId === product.id ? "Suppression..." : "Supprimer"}
-                </button>
-              </article>
-            ))}
-          </div>
+          {isLoadingOffers ? (
+            <p className="admin-category-empty">Chargement des produits...</p>
+          ) : offers.length > 0 ? (
+            <div className="admin-offers-list">
+              {offers.map((product) => (
+                <article className="admin-offer-row" key={product.id}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt={product.alt} height={64} src={product.image} width={64} />
+                  <div>
+                    <strong>{product.name}</strong>
+                    <span>
+                      {product.category} / {formatPrice(product.price)}
+                    </span>
+                  </div>
+                  <button onClick={() => setForm(productToForm(product))} type="button">
+                    Modifier
+                  </button>
+                  <button
+                    disabled={deletingOfferId === product.id}
+                    onClick={() => deleteOffer(product)}
+                    type="button"
+                  >
+                    {deletingOfferId === product.id ? "Suppression..." : "Supprimer"}
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="admin-category-empty">
+              Aucun produit en base. Ajoutez votre premier produit avec le formulaire.
+            </p>
+          )}
         </div>
       </div>
     </section>

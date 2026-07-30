@@ -5,8 +5,26 @@ const COOKIE_NAME = "focus_admin_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 24;
 const REMEMBER_SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
+const WEAK_SECRETS = new Set([
+  "focus-dev-session-secret",
+  "replace-with-a-long-random-secret",
+  "use-a-long-random-secret"
+]);
+
 function getSecret() {
-  return process.env.ADMIN_SESSION_SECRET || "focus-dev-session-secret";
+  const secret = process.env.ADMIN_SESSION_SECRET;
+
+  if (secret && secret.length >= 32 && !WEAK_SECRETS.has(secret)) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return secret || "focus-dev-session-secret";
+  }
+
+  throw new Error(
+    "ADMIN_SESSION_SECRET is missing or insecure. Set it to a random value of 32+ characters."
+  );
 }
 
 function sign(payload: string) {
@@ -14,10 +32,21 @@ function sign(payload: string) {
 }
 
 export function getAdminCredentials() {
-  return {
-    username: process.env.ADMIN_USERNAME || "FOCUSADMIN2026",
-    password: process.env.ADMIN_PASSWORD || "TaharBNA2026+"
-  };
+  const username = process.env.ADMIN_USERNAME;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (username && password) {
+    return { username, password };
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return {
+      username: username || "FOCUSADMIN2026",
+      password: password || "TaharBNA2026+"
+    };
+  }
+
+  return null;
 }
 
 export function createAdminToken(maxAge = SESSION_TTL_SECONDS) {
@@ -41,7 +70,12 @@ export function verifyAdminToken(token?: string) {
     return false;
   }
 
-  const expected = sign(payload);
+  let expected: string;
+  try {
+    expected = sign(payload);
+  } catch {
+    return false;
+  }
   const receivedBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expected);
 

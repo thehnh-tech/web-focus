@@ -1,29 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { fallbackProducts } from "@/lib/products";
-import type { Product, ProductCategory } from "@/lib/types";
+import type { Category, Product } from "@/lib/types";
 import { ProductCard } from "@/components/commerce/ProductCard";
 
 type SortMode = "Featured" | "Price: Low to High" | "Price: High to Low" | "Newest";
-type FilterMode = "All" | ProductCategory;
 
-const shopCategories: ProductCategory[] = ["Compression Tops", "Sets", "Oversize"];
-const filters: FilterMode[] = ["All", ...shopCategories];
 const sorts: SortMode[] = [
   "Featured",
   "Price: Low to High",
   "Price: High to Low",
   "Newest"
 ];
-
-const filterLabels: Record<FilterMode, string> = {
-  All: "Tous",
-  "Compression Tops": "Compression",
-  Oversize: "Oversize",
-  Sets: "Packs"
-};
-
 
 const sortLabels: Record<SortMode, string> = {
   Featured: "Sélection",
@@ -36,43 +24,74 @@ export function ProductListing({
   initialCategory = "All",
   compactFilters = false
 }: {
-  initialCategory?: FilterMode;
+  initialCategory?: string;
   compactFilters?: boolean;
 }) {
-  const [products, setProducts] = useState<Product[]>(fallbackProducts);
-  const [activeFilter, setActiveFilter] = useState<FilterMode>(initialCategory);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string>(initialCategory);
   const [sort, setSort] = useState<SortMode>("Featured");
 
   useEffect(() => {
     let isMounted = true;
 
-    fetch("/api/offers", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (isMounted && Array.isArray(data?.offers) && data.offers.length > 0) {
-          setProducts(data.offers);
+    Promise.all([
+      fetch("/api/offers", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null),
+      fetch("/api/categories", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null)
+    ])
+      .then(([offersData, categoriesData]) => {
+        if (!isMounted) {
+          return;
+        }
+
+        if (Array.isArray(offersData?.offers)) {
+          setProducts(offersData.offers);
+        } else {
+          // Une panne des catégories seule est tolérable (les filtres
+          // retombent sur « Tous ») ; sans produits, on affiche l'erreur.
+          setHasError(true);
+        }
+
+        if (Array.isArray(categoriesData?.categories)) {
+          setCategories(categoriesData.categories);
         }
       })
-      .catch(() => undefined);
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       isMounted = false;
     };
   }, []);
 
+  const filters = useMemo(() => {
+    const names = categories.map((category) => category.name);
+    return ["All", ...names];
+  }, [categories]);
+
   const visibleProducts = useMemo(() => {
-    const shopProducts = products.filter((product) =>
-      shopCategories.includes(product.category)
-    );
     const filtered =
       activeFilter === "All"
-        ? shopProducts
-        : shopProducts.filter((product) => product.category === activeFilter);
+        ? products
+        : products.filter((product) => product.category === activeFilter);
 
     return [...filtered].sort((a, b) => {
       if (sort === "Price: Low to High") return a.price - b.price;
       if (sort === "Price: High to Low") return b.price - a.price;
-      if (sort === "Newest") return b.id.localeCompare(a.id);
+      if (sort === "Newest") {
+        return (
+          new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+        );
+      }
       return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
     });
   }, [activeFilter, products, sort]);
@@ -93,7 +112,7 @@ export function ProductListing({
                 onClick={() => setActiveFilter(filter)}
                 type="button"
               >
-                {filterLabels[filter]}
+                {filter === "All" ? "Tous" : filter}
               </button>
             ))}
           </div>
@@ -109,7 +128,18 @@ export function ProductListing({
           </label>
         </div>
 
-        {visibleProducts.length > 0 ? (
+        {isLoading ? (
+          <div className="product-grid shop-grid">
+            {[0, 1, 2].map((index) => (
+              <div className="product-card product-card-skeleton" key={index} aria-hidden="true" />
+            ))}
+          </div>
+        ) : hasError ? (
+          <div className="empty-state">
+            <h2>Une erreur est survenue.</h2>
+            <p>Impossible de charger les produits. Veuillez réessayer plus tard.</p>
+          </div>
+        ) : visibleProducts.length > 0 ? (
           <div className="product-grid shop-grid">
             {visibleProducts.map((product) => (
               <ProductCard product={product} key={product.id} />

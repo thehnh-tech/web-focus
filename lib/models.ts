@@ -1,16 +1,20 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 
+const categorySchema = new Schema(
+  {
+    slug: { type: String, required: true, unique: true, trim: true },
+    name: { type: String, required: true, trim: true }
+  },
+  { timestamps: true }
+);
+
 const offerSchema = new Schema(
   {
     slug: { type: String, required: true, unique: true, trim: true },
     name: { type: String, required: true, trim: true },
     price: { type: Number, required: true },
     oldPrice: { type: Number },
-    category: {
-      type: String,
-      enum: ["Compression Tops", "Sets"],
-      required: true
-    },
+    category: { type: String, required: true, trim: true },
     image: { type: String, required: true },
     secondaryImage: { type: String },
     alt: { type: String, required: true },
@@ -56,6 +60,10 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
+export type CategoryDocument = InferSchemaType<typeof categorySchema> & {
+  _id: mongoose.Types.ObjectId;
+};
+
 export type OfferDocument = InferSchemaType<typeof offerSchema> & {
   _id: mongoose.Types.ObjectId;
 };
@@ -64,6 +72,10 @@ export type OrderDocument = InferSchemaType<typeof orderSchema> & {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
 };
+
+export const CategoryModel =
+  (mongoose.models.Category as Model<CategoryDocument>) ||
+  mongoose.model<CategoryDocument>("Category", categorySchema);
 
 export const OfferModel =
   (mongoose.models.Offer as Model<OfferDocument>) ||

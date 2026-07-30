@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/commerce/ProductDetail";
-import { getProductBySlug } from "@/lib/products";
 import { connectToDatabase, hasMongoUri } from "@/lib/mongodb";
 import { OfferModel } from "@/lib/models";
 import { serializeOffer } from "@/lib/server-utils";
@@ -14,20 +13,18 @@ type Props = {
 export const dynamic = "force-dynamic";
 
 async function findProduct(slug: string): Promise<Product | undefined> {
-  if (hasMongoUri()) {
-    await connectToDatabase();
-    const offer = await OfferModel.findOne({ slug }).lean();
-
-    if (offer) {
-      return serializeOffer(offer as Record<string, unknown>);
-    }
-
-    if (await OfferModel.exists({})) {
-      return undefined;
-    }
+  if (!hasMongoUri()) {
+    return undefined;
   }
 
-  return getProductBySlug(slug);
+  await connectToDatabase();
+  const offer = await OfferModel.findOne({ slug }).lean();
+
+  if (!offer) {
+    return undefined;
+  }
+
+  return serializeOffer(offer as Record<string, unknown>);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -41,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.name} | FocusGym`,
+    title: product.name,
     description: product.description,
     openGraph: {
       images: [product.image]

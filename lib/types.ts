@@ -1,18 +1,24 @@
-export type ProductCategory = "Compression Tops" | "Sets" | "Oversize";
-
 export type Product = {
   id: string;
   slug: string;
   name: string;
   price: number;
   oldPrice?: number;
-  category: ProductCategory;
+  category: string;
   image: string;
   secondaryImage?: string;
   alt: string;
   color?: string;
   description: string;
   featured?: boolean;
+  createdAt?: string;
+};
+
+export type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  productCount?: number;
 };
 
 export type CartItem = {

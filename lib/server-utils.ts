@@ -1,12 +1,6 @@
-import type { Product, ProductCategory } from "@/lib/types";
-import { OfferModel } from "@/lib/models";
-import { DELIVERY_FEE, fallbackProducts, governorates, orderSizes } from "@/lib/products";
-
-export const productCategories: ProductCategory[] = [
-  "Compression Tops",
-  "Sets",
-  "Oversize"
-];
+import type { Category, Product } from "@/lib/types";
+import { CategoryModel, OfferModel } from "@/lib/models";
+import { DELIVERY_FEE, governorates, orderSizes } from "@/lib/products";
 
 const objectIdPattern = /^[a-f\d]{24}$/i;
 
@@ -27,6 +21,8 @@ export function slugify(value: string) {
   return value
     .toLowerCase()
     .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
 }
@@ -41,31 +37,133 @@ export function serializeOffer(offer: Record<string, unknown>): Product {
       offer.oldPrice === undefined || offer.oldPrice === null
         ? undefined
         : Number(offer.oldPrice),
-    category: String(offer.category) as ProductCategory,
+    category: String(offer.category),
     image: String(offer.image),
     secondaryImage: offer.secondaryImage ? String(offer.secondaryImage) : undefined,
     alt: String(offer.alt ?? offer.name),
     color: offer.color ? String(offer.color) : undefined,
     description: String(offer.description),
-    featured: offer.featured !== false
+    featured: offer.featured !== false,
+    createdAt:
+      offer.createdAt instanceof Date ? offer.createdAt.toISOString() : undefined
   };
 }
 
-export function validateOfferPayload(body: Record<string, unknown>) {
-  const name = String(body.name ?? "").trim();
-  const price = Number(body.price);
-  const oldPrice =
-    body.oldPrice === undefined || body.oldPrice === "" ? undefined : Number(body.oldPrice);
-  const category = String(body.category ?? "").trim() as ProductCategory;
-  const image = String(body.image ?? "").trim();
-  const description = String(body.description ?? "").trim();
-  const slug = String(body.slug ?? slugify(name)).trim();
+export function serializeCategory(category: Record<string, unknown>): Category {
+  return {
+    id: String(category._id ?? category.id),
+    slug: String(category.slug),
+    name: String(category.name)
+  };
+}
 
-  if (!name || !slug || !Number.isFinite(price) || price <= 0) {
-    return { error: "Le nom, le slug et un prix valide sont obligatoires." };
+export function validateCategoryPayload(body: Record<string, unknown>) {
+  const name = String(body.name ?? "").trim();
+  const slug = slugify(String(body.slug ?? "").trim() || name);
+
+  if (!name || !slug) {
+    return { error: "Le nom de la catégorie est obligatoire." };
   }
 
-  if (!productCategories.includes(category)) {
+  return { data: { name, slug } };
+}
+
+export async function ensureCategoriesSeeded() {
+  const count = await CategoryModel.estimatedDocumentCount();
+
+  if (count > 0) {
+    return;
+  }
+
+  const existing = (await OfferModel.distinct("category")) as string[];
+
+  if (existing.length === 0) {
+    return;
+  }
+
+  // L'index unique sur slug doit exister avant d'écrire, sinon des requêtes
+  // concurrentes au premier déploiement peuvent créer des doublons.
+  await CategoryModel.createIndexes();
+
+  const bySlug = new Map<string, string>();
+
+  for (const raw of existing) {
+    const name = raw?.trim();
+
+    if (!name) {
+      continue;
+    }
+
+    const slug = slugify(name);
+
+    if (!slug) {
+      continue;
+    }
+
+    const kept = bySlug.get(slug);
+
+    if (!kept) {
+      bySlug.set(slug, name);
+    } else if (kept !== name) {
+      // Deux noms qui produisent le même slug : on fusionne sur le premier
+      // pour qu'aucune offre ne reste sans catégorie valide.
+      await OfferModel.updateMany({ category: name }, { $set: { category: kept } });
+    }
+  }
+
+  if (bySlug.size === 0) {
+    return;
+  }
+
+  await CategoryModel.bulkWrite(
+    Array.from(bySlug, ([slug, name]) => ({
+      updateOne: {
+        filter: { slug },
+        update: { $setOnInsert: { name, slug } },
+        upsert: true
+      }
+    })),
+    { ordered: false }
+  );
+}
+
+function isAllowedImageSrc(value: string) {
+  if (value.startsWith("/")) {
+    return true;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "res.cloudinary.com";
+  } catch {
+    return false;
+  }
+}
+
+export async function validateOfferPayload(body: Record<string, unknown>) {
+  const name = String(body.name ?? "").trim();
+  const price = Number(body.price);
+  // null (et pas undefined) pour que Mongoose efface bien le champ lors d'un PUT :
+  // les clés undefined sont supprimées de l'update et l'ancienne valeur resterait.
+  const oldPrice =
+    body.oldPrice === undefined || body.oldPrice === "" ? null : Number(body.oldPrice);
+  const category = String(body.category ?? "").trim();
+  const image = String(body.image ?? "").trim();
+  const secondaryImage = String(body.secondaryImage ?? "").trim() || null;
+  const description = String(body.description ?? "").trim();
+  const slug = String(body.slug ?? "").trim() || slugify(name);
+
+  if (!name || !slug || !Number.isFinite(price) || price <= 0) {
+    return { error: "Le nom et un prix valide sont obligatoires." };
+  }
+
+  if (!category) {
+    return { error: "La catégorie est obligatoire." };
+  }
+
+  const categoryExists = await CategoryModel.exists({ name: category });
+
+  if (!categoryExists) {
     return { error: "Catégorie produit invalide." };
   }
 
@@ -73,7 +171,14 @@ export function validateOfferPayload(body: Record<string, unknown>) {
     return { error: "L’image et la description sont obligatoires." };
   }
 
-  if (oldPrice !== undefined && (!Number.isFinite(oldPrice) || oldPrice <= 0)) {
+  if (!isAllowedImageSrc(image) || (secondaryImage && !isAllowedImageSrc(secondaryImage))) {
+    return {
+      error:
+        "L’image doit provenir de l’upload (res.cloudinary.com) ou être un chemin local commençant par /."
+    };
+  }
+
+  if (oldPrice !== null && (!Number.isFinite(oldPrice) || oldPrice <= 0)) {
     return { error: "L’ancien prix doit être un nombre valide." };
   }
 
@@ -85,71 +190,13 @@ export function validateOfferPayload(body: Record<string, unknown>) {
       oldPrice,
       category,
       image,
-      secondaryImage: String(body.secondaryImage ?? "").trim() || undefined,
+      secondaryImage,
       alt: String(body.alt ?? name).trim() || name,
-      color: String(body.color ?? "").trim() || undefined,
+      color: String(body.color ?? "").trim() || null,
       description,
       featured: body.featured !== false
     }
   };
-}
-
-export async function seedFallbackOffersIfEmpty() {
-  const count = await OfferModel.estimatedDocumentCount();
-
-  if (count > 0) {
-    return;
-  }
-
-  try {
-    await OfferModel.insertMany(
-      fallbackProducts.map((product) => ({
-        slug: product.slug,
-        name: product.name,
-        price: product.price,
-        oldPrice: product.oldPrice,
-        category: product.category,
-        image: product.image,
-        secondaryImage: product.secondaryImage,
-        alt: product.alt,
-        color: product.color,
-        description: product.description,
-        featured: product.featured !== false
-      })),
-      { ordered: false }
-    );
-  } catch (error) {
-    if ((error as { code?: number }).code !== 11000) {
-      throw error;
-    }
-  }
-}
-
-export async function restoreFallbackOffers() {
-  const operations = fallbackProducts.map((product) => ({
-    updateOne: {
-      filter: { slug: product.slug },
-      update: {
-        $setOnInsert: {
-          slug: product.slug,
-          name: product.name,
-          price: product.price,
-          oldPrice: product.oldPrice,
-          category: product.category,
-          image: product.image,
-          secondaryImage: product.secondaryImage,
-          alt: product.alt,
-          color: product.color,
-          description: product.description,
-          featured: product.featured !== false
-        }
-      },
-      upsert: true
-    }
-  }));
-
-  const result = await OfferModel.bulkWrite(operations);
-  return result.upsertedCount;
 }
 
 async function resolveOfficialOrderItems(items: ParsedOrderItem[]) {
@@ -168,23 +215,12 @@ async function resolveOfficialOrderItems(items: ParsedOrderItem[]) {
   const officialProducts = offers.map((offer) =>
     serializeOffer(offer as Record<string, unknown>)
   );
-  const useFallbackProducts =
-    officialProducts.length === 0 && !(await OfferModel.exists({}));
   const productsById = new Map(officialProducts.map((product) => [product.id, product]));
   const productsBySlug = new Map(officialProducts.map((product) => [product.slug, product]));
-  const fallbackProductsById = new Map(fallbackProducts.map((product) => [product.id, product]));
-  const fallbackProductsBySlug = new Map(
-    fallbackProducts.map((product) => [product.slug, product])
-  );
   const officialItems: OfficialOrderItem[] = [];
 
   for (const item of items) {
-    const product =
-      productsById.get(item.productId) ??
-      productsBySlug.get(item.slug) ??
-      (useFallbackProducts
-        ? fallbackProductsById.get(item.productId) ?? fallbackProductsBySlug.get(item.slug)
-        : undefined);
+    const product = productsById.get(item.productId) ?? productsBySlug.get(item.slug);
 
     if (!product) {
       return { error: "Produit indisponible dans le panier." };
@@ -281,8 +317,4 @@ export async function validateOrderPayload(body: Record<string, unknown>) {
       paymentMethod: "Paiement à la livraison"
     }
   };
-}
-
-export function fallbackProductBySlug(slug: string) {
-  return fallbackProducts.find((product) => product.slug === slug);
 }

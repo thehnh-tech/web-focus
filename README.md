@@ -19,26 +19,37 @@ RESEND_API_KEY=re_...
 ORDER_EMAIL_TO=focusgym.pro@gmail.com
 CONTACT_EMAIL_TO=focusgym.pro@gmail.com
 RESEND_FROM_EMAIL="FocusGym <onboarding@resend.dev>"
-ADMIN_USERNAME=FOCUSADMIN2026
-ADMIN_PASSWORD=TaharBNA2026+
-ADMIN_SESSION_SECRET=use-a-long-random-secret
+ADMIN_USERNAME=<choose-a-username>
+ADMIN_PASSWORD=<choose-a-strong-password>
+ADMIN_SESSION_SECRET=<random, 32+ chars, e.g. openssl rand -base64 48>
+CLOUDINARY_CLOUD_NAME=<cloudinary dashboard>
+CLOUDINARY_API_KEY=<cloudinary dashboard>
+CLOUDINARY_API_SECRET=<cloudinary dashboard>
 ```
+
+In production the app refuses to authenticate if `ADMIN_USERNAME`, `ADMIN_PASSWORD`
+or a strong `ADMIN_SESSION_SECRET` are not configured. Never commit real
+credentials to this repository.
 
 ## Admin
 
-Admin URL: `/admin/login`
-
-Default credentials are read from environment variables:
-
-- Login: `FOCUSADMIN2026`
-- Password: `TaharBNA2026+`
+Admin URL: `/admin/login` (credentials come from the environment variables above).
 
 The admin panel supports:
 
-- add, edit and delete offers
+- add, edit and delete products, with Cloudinary image upload
+- add, rename and delete categories (renaming updates all products; deletion is
+  blocked while products still use the category)
 - view new orders
-- update order status
+- update order status and delete orders
 - persistent admin session cookie
+
+## Catalog
+
+Products and categories live entirely in MongoDB — there are no hardcoded
+products. On first run against a database that already contains products, the
+existing category names are imported automatically into the categories
+collection.
 
 ## Orders
 

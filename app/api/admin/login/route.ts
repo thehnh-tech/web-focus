@@ -16,6 +16,13 @@ export async function POST(request: Request) {
   const remember = Boolean(body.remember);
   const credentials = getAdminCredentials();
 
+  if (!credentials) {
+    return NextResponse.json(
+      { error: "Authentification admin non configurée (ADMIN_USERNAME / ADMIN_PASSWORD)." },
+      { status: 503 }
+    );
+  }
+
   if (username !== credentials.username || password !== credentials.password) {
     return NextResponse.json({ error: "Identifiants admin invalides." }, { status: 401 });
   }

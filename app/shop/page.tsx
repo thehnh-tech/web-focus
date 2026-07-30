@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ProductListing } from "@/components/commerce/ProductListing";
 
 export const metadata: Metadata = {
-  title: "Boutique | FocusGym",
+  title: "Boutique",
   description: "Découvrez les vêtements de compression FocusGym conçus pour chaque séance."
 };
 
