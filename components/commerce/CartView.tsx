@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { DELIVERY_FEE, formatColor, formatDeliveryFee, formatPrice } from "@/lib/products";
+import { formatColor, formatDeliveryFee, formatPrice } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { useDeliveryFee } from "@/lib/use-delivery-fee";
 
 export function CartView() {
   const { items, subtotal, updateQuantity, removeItem, getItemKey } = useCart();
-  const total = items.length > 0 ? subtotal + DELIVERY_FEE : 0;
+  const deliveryFee = useDeliveryFee();
+  const total = items.length > 0 ? subtotal + deliveryFee : 0;
 
   if (items.length === 0) {
     return (
@@ -81,7 +83,7 @@ export function CartView() {
           </div>
           <div>
             <span>Livraison</span>
-            <strong>{formatDeliveryFee(DELIVERY_FEE)}</strong>
+            <strong>{formatDeliveryFee(deliveryFee)}</strong>
           </div>
           <div className="summary-total">
             <span>Total</span>

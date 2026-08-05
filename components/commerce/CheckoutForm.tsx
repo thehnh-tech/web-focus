@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
-  DELIVERY_FEE,
   formatDeliveryFee,
   formatPrice,
   governorates,
   orderSizes
 } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { useDeliveryFee } from "@/lib/use-delivery-fee";
 
 type FormState = {
   fullName: string;
@@ -31,13 +31,14 @@ const initialForm: FormState = {
 
 export function CheckoutForm() {
   const { items, subtotal, clearCart } = useCart();
+  const deliveryFee = useDeliveryFee();
   const [form, setForm] = useState<FormState>(initialForm);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
   const total = useMemo(
-    () => (items.length > 0 ? subtotal + DELIVERY_FEE : 0),
-    [items.length, subtotal]
+    () => (items.length > 0 ? subtotal + deliveryFee : 0),
+    [deliveryFee, items.length, subtotal]
   );
 
   function updateField(field: keyof FormState, value: string) {
@@ -80,7 +81,7 @@ export function CheckoutForm() {
         <h1>Finaliser</h1>
         <p>
           Le paiement à la livraison est disponible partout en Tunisie. La
-          livraison est gratuite et sera confirmée par notre équipe.
+          commande sera confirmée par notre équipe.
         </p>
       </div>
 
@@ -215,7 +216,7 @@ export function CheckoutForm() {
           </div>
           <div>
             <span>Livraison</span>
-            <strong>{formatDeliveryFee(items.length > 0 ? DELIVERY_FEE : 0)}</strong>
+            <strong>{formatDeliveryFee(items.length > 0 ? deliveryFee : 0)}</strong>
           </div>
           <div className="summary-total">
             <span>Total</span>

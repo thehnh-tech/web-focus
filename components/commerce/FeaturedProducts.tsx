@@ -47,14 +47,14 @@ export function FeaturedProducts() {
   }, []);
 
   const featured = useMemo(
-    () => products.filter((product) => product.featured !== false).slice(0, 3),
+    () => products.filter((product) => product.featured !== false).slice(0, 4),
     [products]
   );
 
   if (isLoading) {
     return (
-      <div className="product-grid">
-        {[0, 1, 2].map((index) => (
+      <div className="product-grid shop-grid">
+        {[0, 1, 2, 3].map((index) => (
           <div className="product-card product-card-skeleton" key={index} aria-hidden="true" />
         ))}
       </div>
@@ -80,7 +80,7 @@ export function FeaturedProducts() {
   }
 
   return (
-    <div className="product-grid">
+    <div className="product-grid shop-grid">
       {featured.map((product) => (
         <ProductCard product={product} key={product.id} />
       ))}

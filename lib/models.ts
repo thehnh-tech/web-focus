@@ -1,5 +1,13 @@
 import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
 
+const settingsSchema = new Schema(
+  {
+    key: { type: String, required: true, unique: true, default: "shop" },
+    deliveryFee: { type: Number, required: true, default: 0, min: 0 }
+  },
+  { timestamps: true }
+);
+
 const categorySchema = new Schema(
   {
     slug: { type: String, required: true, unique: true, trim: true },
@@ -60,6 +68,10 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
+export type SettingsDocument = InferSchemaType<typeof settingsSchema> & {
+  _id: mongoose.Types.ObjectId;
+};
+
 export type CategoryDocument = InferSchemaType<typeof categorySchema> & {
   _id: mongoose.Types.ObjectId;
 };
@@ -72,6 +84,10 @@ export type OrderDocument = InferSchemaType<typeof orderSchema> & {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
 };
+
+export const SettingsModel =
+  (mongoose.models.Settings as Model<SettingsDocument>) ||
+  mongoose.model<SettingsDocument>("Settings", settingsSchema);
 
 export const CategoryModel =
   (mongoose.models.Category as Model<CategoryDocument>) ||

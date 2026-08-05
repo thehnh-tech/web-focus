@@ -241,8 +241,29 @@ export function AdminDashboard() {
   const [editingCategoryName, setEditingCategoryName] = useState("");
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
   const [pendingUploads, setPendingUploads] = useState(0);
+  const [savedDeliveryFee, setSavedDeliveryFee] = useState(0);
+  const [deliveryFeeInput, setDeliveryFeeInput] = useState("");
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const isEditing = Boolean(form.id);
+
+  async function loadSettings() {
+    try {
+      const response = await fetch("/api/settings", { cache: "no-store" });
+
+      if (response.ok) {
+        const data = await response.json().catch(() => null);
+        const fee = Number(data?.settings?.deliveryFee);
+
+        if (Number.isFinite(fee)) {
+          setSavedDeliveryFee(fee);
+          setDeliveryFeeInput((current) => (current === "" ? String(fee) : current));
+        }
+      }
+    } catch {
+      setError("Impossible d’actualiser les paramètres. Cliquez sur Actualiser.");
+    }
+  }
 
   async function loadCategories() {
     try {
@@ -266,7 +287,8 @@ export function AdminDashboard() {
       const [offersResponse, ordersResponse] = await Promise.all([
         fetch("/api/offers", { cache: "no-store" }),
         fetch("/api/orders", { cache: "no-store" }),
-        loadCategories()
+        loadCategories(),
+        loadSettings()
       ]);
 
       if (offersResponse.ok) {
@@ -385,6 +407,36 @@ export function AdminDashboard() {
       setError("Impossible de supprimer le produit.");
     } finally {
       setDeletingOfferId(null);
+    }
+  }
+
+  async function saveSettings(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+    setError("");
+    setIsSavingSettings(true);
+
+    try {
+      const response = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deliveryFee: Number(deliveryFeeInput) })
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(data?.error || "Impossible d’enregistrer les paramètres.");
+        return;
+      }
+
+      const fee = Number(data?.settings?.deliveryFee ?? 0);
+      setSavedDeliveryFee(fee);
+      setDeliveryFeeInput(String(fee));
+      setMessage("Frais de livraison enregistrés.");
+    } catch {
+      setError("Impossible d’enregistrer les paramètres. Vérifiez votre connexion.");
+    } finally {
+      setIsSavingSettings(false);
     }
   }
 
@@ -641,6 +693,35 @@ export function AdminDashboard() {
             <span>Les nouveaux bons de commande apparaîtront ici.</span>
           </div>
         )}
+      </div>
+
+      <div className="admin-panel">
+        <div className="admin-section-head">
+          <div>
+            <h2>Paramètres</h2>
+            <p>Frais de livraison ajoutés au total de chaque commande (0 = gratuite).</p>
+          </div>
+        </div>
+
+        <form className="admin-category-form" onSubmit={saveSettings}>
+          <input
+            aria-label="Frais de livraison en dinars"
+            className="admin-input"
+            min="0"
+            onChange={(event) => setDeliveryFeeInput(event.target.value)}
+            placeholder="Frais de livraison (DT)"
+            required
+            step="0.1"
+            type="number"
+            value={deliveryFeeInput}
+          />
+          <button className="btn-secondary" disabled={isSavingSettings} type="submit">
+            {isSavingSettings ? "Enregistrement..." : "Enregistrer"}
+          </button>
+        </form>
+        <p className="admin-category-empty">
+          Frais actuels : {formatDeliveryFee(savedDeliveryFee)}
+        </p>
       </div>
 
       <div className="admin-panel">

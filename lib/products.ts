@@ -1,5 +1,3 @@
-export const DELIVERY_FEE = 0;
-
 export const governorates = [
   "Tunis",
   "Ariana",
@@ -34,7 +32,7 @@ export function formatPrice(value: number) {
   return `${value.toFixed(1)} DT`;
 }
 
-export function formatDeliveryFee(value = DELIVERY_FEE) {
+export function formatDeliveryFee(value: number) {
   return value > 0 ? formatPrice(value) : "Gratuite";
 }
 

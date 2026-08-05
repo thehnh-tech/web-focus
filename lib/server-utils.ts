@@ -1,6 +1,6 @@
 import type { Category, Product } from "@/lib/types";
-import { CategoryModel, OfferModel } from "@/lib/models";
-import { DELIVERY_FEE, governorates, orderSizes } from "@/lib/products";
+import { CategoryModel, OfferModel, SettingsModel } from "@/lib/models";
+import { governorates, orderSizes } from "@/lib/products";
 
 const objectIdPattern = /^[a-f\d]{24}$/i;
 
@@ -47,6 +47,22 @@ export function serializeOffer(offer: Record<string, unknown>): Product {
     createdAt:
       offer.createdAt instanceof Date ? offer.createdAt.toISOString() : undefined
   };
+}
+
+export async function getDeliveryFee() {
+  const settings = await SettingsModel.findOne({ key: "shop" }).lean();
+  const fee = Number(settings?.deliveryFee ?? 0);
+  return Number.isFinite(fee) && fee > 0 ? fee : 0;
+}
+
+export async function updateDeliveryFee(deliveryFee: number) {
+  const settings = await SettingsModel.findOneAndUpdate(
+    { key: "shop" },
+    { $set: { deliveryFee } },
+    { new: true, upsert: true }
+  ).lean();
+
+  return Number(settings?.deliveryFee ?? 0);
 }
 
 export function serializeCategory(category: Record<string, unknown>): Category {
@@ -300,7 +316,7 @@ export async function validateOrderPayload(body: Record<string, unknown>) {
   }
 
   const subtotal = resolved.items.reduce((total, item) => total + item.price * item.quantity, 0);
-  const deliveryFee = DELIVERY_FEE;
+  const deliveryFee = await getDeliveryFee();
 
   return {
     data: {
