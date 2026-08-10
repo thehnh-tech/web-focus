@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 import { formatColor, formatPrice, sizes } from "@/lib/products";
 import type { CartItem, Product } from "@/lib/types";
 import { Accordion } from "@/components/ui/Accordion";
@@ -48,6 +49,16 @@ export function ProductDetail({ product }: { product: Product }) {
     () => [product.image, product.secondaryImage].filter(Boolean) as string[],
     [product.image, product.secondaryImage]
   );
+
+  useEffect(() => {
+    trackPixelEvent("ViewContent", {
+      content_ids: [product.id],
+      content_name: product.name,
+      content_type: "product",
+      value: product.price,
+      currency: "TND"
+    });
+  }, [product.id, product.name, product.price]);
 
   function handleAddToCart() {
     setButtonText("Ajout...");

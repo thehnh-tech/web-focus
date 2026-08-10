@@ -10,6 +10,7 @@ import {
   type ReactNode
 } from "react";
 import type { CartItem, Product } from "@/lib/types";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 
 type AddToCartInput = {
   product: Product;
@@ -116,6 +117,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [hasHydrated, items.length]);
 
   const addToCart = useCallback(({ product, size = "M", quantity = 1 }: AddToCartInput) => {
+    trackPixelEvent("AddToCart", {
+      content_ids: [product.id],
+      content_name: product.name,
+      content_type: "product",
+      value: product.price * quantity,
+      currency: "TND"
+    });
+
     setItems((currentItems) => {
       const nextItem: CartItem = {
         productId: product.id,

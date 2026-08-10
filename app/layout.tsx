@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { AppProviders } from "@/components/layout/AppProviders";
 import { Footer } from "@/components/layout/Footer";
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr">
       <body>
+        <MetaPixel />
         <AppProviders>
           <AnnouncementBar />
           <Header />

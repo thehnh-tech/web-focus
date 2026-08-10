@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   formatDeliveryFee,
   formatPrice,
@@ -9,6 +9,7 @@ import {
   orderSizes
 } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { trackPixelEvent } from "@/lib/meta-pixel";
 import { useDeliveryFee } from "@/lib/use-delivery-fee";
 
 type FormState = {
@@ -41,6 +42,20 @@ export function CheckoutForm() {
     [deliveryFee, items.length, subtotal]
   );
 
+  const hasTrackedCheckout = useRef(false);
+
+  useEffect(() => {
+    if (!hasTrackedCheckout.current && items.length > 0) {
+      hasTrackedCheckout.current = true;
+      trackPixelEvent("InitiateCheckout", {
+        content_ids: items.map((item) => item.productId),
+        num_items: items.reduce((count, item) => count + item.quantity, 0),
+        value: subtotal,
+        currency: "TND"
+      });
+    }
+  }, [items, subtotal]);
+
   function updateField(field: keyof FormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
@@ -66,6 +81,13 @@ export function CheckoutForm() {
       setMessage(
         "Commande confirmée. Merci pour votre commande. Nous vous contacterons rapidement pour confirmer la livraison."
       );
+      trackPixelEvent("Purchase", {
+        content_ids: items.map((item) => item.productId),
+        content_type: "product",
+        num_items: items.reduce((count, item) => count + item.quantity, 0),
+        value: total,
+        currency: "TND"
+      });
       clearCart();
       setForm(initialForm);
     } catch (error) {
