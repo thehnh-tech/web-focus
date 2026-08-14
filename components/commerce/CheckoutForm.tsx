@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   formatDeliveryFee,
@@ -31,6 +32,7 @@ const initialForm: FormState = {
 };
 
 export function CheckoutForm() {
+  const router = useRouter();
   const { items, subtotal, clearCart } = useCart();
   const deliveryFee = useDeliveryFee();
   const [form, setForm] = useState<FormState>(initialForm);
@@ -77,10 +79,6 @@ export function CheckoutForm() {
         throw new Error(data?.error || "Impossible de valider la commande.");
       }
 
-      setStatus("success");
-      setMessage(
-        "Commande confirmée. Merci pour votre commande. Nous vous contacterons rapidement pour confirmer la livraison."
-      );
       trackPixelEvent("Purchase", {
         content_ids: items.map((item) => item.productId),
         content_type: "product",
@@ -89,7 +87,10 @@ export function CheckoutForm() {
         currency: "TND"
       });
       clearCart();
-      setForm(initialForm);
+
+      const orderId = String(data?.order?.id ?? "");
+      const orderRef = orderId ? orderId.slice(-6).toUpperCase() : "";
+      router.push(orderRef ? `/merci?ref=${orderRef}` : "/merci");
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Impossible de valider la commande.");
