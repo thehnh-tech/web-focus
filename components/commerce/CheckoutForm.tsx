@@ -225,7 +225,7 @@ export function CheckoutForm() {
             items.map((item) => (
               <div key={`${item.productId}-${item.size}-${item.color}`}>
                 <span>
-                  {item.name} × {item.quantity}
+                  {item.name} ({item.size}) × {item.quantity}
                 </span>
                 <strong>{formatPrice(item.price * item.quantity)}</strong>
               </div>

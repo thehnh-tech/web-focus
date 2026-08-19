@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { formatDeliveryFee, formatPrice } from "@/lib/products";
+import { ALL_SIZES } from "@/lib/sizes";
 import type { Category, Product } from "@/lib/types";
 
 type OfferForm = {
@@ -18,6 +19,7 @@ type OfferForm = {
   color: string;
   description: string;
   featured: boolean;
+  soldOutSizes: string[];
 };
 
 type Order = {
@@ -47,7 +49,8 @@ const emptyForm: OfferForm = {
   alt: "",
   color: "",
   description: "",
-  featured: true
+  featured: true,
+  soldOutSizes: []
 };
 
 const statuses: Order["status"][] = ["new", "confirmed", "delivered", "cancelled"];
@@ -72,7 +75,8 @@ function productToForm(product: Product): OfferForm {
     alt: product.alt,
     color: product.color ?? "",
     description: product.description,
-    featured: product.featured !== false
+    featured: product.featured !== false,
+    soldOutSizes: product.soldOutSizes ?? []
   };
 }
 
@@ -335,6 +339,15 @@ export function AdminDashboard() {
 
   function updateForm(field: keyof OfferForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function toggleSoldOutSize(size: string) {
+    setForm((current) => ({
+      ...current,
+      soldOutSizes: current.soldOutSizes.includes(size)
+        ? current.soldOutSizes.filter((entry) => entry !== size)
+        : [...current.soldOutSizes, size]
+    }));
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -908,6 +921,26 @@ export function AdminDashboard() {
               />
               Produit mis en avant
             </label>
+            <div className="admin-sizes-field admin-full">
+              <span className="admin-upload-label">Tailles en rupture de stock</span>
+              <div className="admin-size-toggles">
+                {ALL_SIZES.map((size) => {
+                  const isSoldOut = form.soldOutSizes.includes(size);
+                  return (
+                    <button
+                      aria-pressed={isSoldOut}
+                      className={isSoldOut ? "sold-out" : ""}
+                      key={size}
+                      onClick={() => toggleSoldOutSize(size)}
+                      type="button"
+                    >
+                      {size}
+                      <small>{isSoldOut ? "Rupture" : "Disponible"}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <textarea
               className="admin-input textarea admin-full"
               onChange={(event) => updateForm("description", event.target.value)}
@@ -959,6 +992,11 @@ export function AdminDashboard() {
                     <span>
                       {product.category} / {formatPrice(product.price)}
                     </span>
+                    {product.soldOutSizes && product.soldOutSizes.length > 0 ? (
+                      <span className="admin-soldout-hint">
+                        Rupture : {product.soldOutSizes.join(", ")}
+                      </span>
+                    ) : null}
                   </div>
                   <button onClick={() => setForm(productToForm(product))} type="button">
                     Modifier

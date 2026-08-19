@@ -1,3 +1,5 @@
+import { ALL_SIZES } from "@/lib/sizes";
+
 export const governorates = [
   "Tunis",
   "Ariana",
@@ -25,8 +27,8 @@ export const governorates = [
   "Kébili"
 ] as const;
 
-export const sizes = ["S", "M", "L"] as const;
-export const orderSizes = ["S", "M", "L"] as const;
+export const sizes = ALL_SIZES;
+export const orderSizes = ALL_SIZES;
 
 export function formatPrice(value: number) {
   return `${value.toFixed(1)} DT`;

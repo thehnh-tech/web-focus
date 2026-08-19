@@ -28,7 +28,8 @@ const offerSchema = new Schema(
     alt: { type: String, required: true },
     color: { type: String },
     description: { type: String, required: true },
-    featured: { type: Boolean, default: true }
+    featured: { type: Boolean, default: true },
+    soldOutSizes: { type: [String], default: [] }
   },
   { timestamps: true }
 );

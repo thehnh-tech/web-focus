@@ -1,6 +1,7 @@
 import type { Category, Product } from "@/lib/types";
 import { CategoryModel, OfferModel, SettingsModel } from "@/lib/models";
 import { governorates, orderSizes } from "@/lib/products";
+import { isSizeSoldOut, sanitizeSoldOutSizes } from "@/lib/sizes";
 
 const objectIdPattern = /^[a-f\d]{24}$/i;
 
@@ -44,6 +45,7 @@ export function serializeOffer(offer: Record<string, unknown>): Product {
     color: offer.color ? String(offer.color) : undefined,
     description: String(offer.description),
     featured: offer.featured !== false,
+    soldOutSizes: sanitizeSoldOutSizes(offer.soldOutSizes),
     createdAt:
       offer.createdAt instanceof Date ? offer.createdAt.toISOString() : undefined
   };
@@ -210,7 +212,13 @@ export async function validateOfferPayload(body: Record<string, unknown>) {
       alt: String(body.alt ?? name).trim() || name,
       color: String(body.color ?? "").trim() || null,
       description,
-      featured: body.featured !== false
+      featured: body.featured !== false,
+      // Clé omise si le payload ne l'envoie pas : Mongoose retire les clés
+      // undefined de l'update, donc un client qui n'envoie pas le champ ne
+      // remet pas à zéro les ruptures enregistrées.
+      soldOutSizes: Array.isArray(body.soldOutSizes)
+        ? sanitizeSoldOutSizes(body.soldOutSizes)
+        : undefined
     }
   };
 }
@@ -240,6 +248,12 @@ async function resolveOfficialOrderItems(items: ParsedOrderItem[]) {
 
     if (!product) {
       return { error: "Produit indisponible dans le panier." };
+    }
+
+    if (isSizeSoldOut(product, item.size)) {
+      return {
+        error: `La taille ${item.size} de « ${product.name} » est en rupture de stock. Retirez-la du panier pour continuer.`
+      };
     }
 
     officialItems.push({

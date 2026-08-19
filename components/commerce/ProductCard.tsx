@@ -5,15 +5,22 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { defaultAvailableSize, isProductSoldOut } from "@/lib/sizes";
 import type { Product } from "@/lib/types";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const [state, setState] = useState<"idle" | "adding" | "added">("idle");
+  const soldOut = isProductSoldOut(product);
+  const quickAddSize = defaultAvailableSize(product);
 
   function handleAddToCart() {
+    if (!quickAddSize) {
+      return;
+    }
+
     setState("adding");
-    addToCart({ product, size: "M", quantity: 1 });
+    addToCart({ product, size: quickAddSize, quantity: 1 });
     window.setTimeout(() => setState("added"), 250);
     window.setTimeout(() => setState("idle"), 1200);
   }
@@ -42,11 +49,17 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
         <button
           className="add-to-cart"
-          disabled={state !== "idle"}
+          disabled={soldOut || state !== "idle"}
           onClick={handleAddToCart}
           type="button"
         >
-          {state === "adding" ? "Ajout..." : state === "added" ? "Ajouté" : "Ajouter au panier"}
+          {soldOut
+            ? "Épuisé"
+            : state === "adding"
+              ? `Ajout... (${quickAddSize})`
+              : state === "added"
+                ? `Ajouté (${quickAddSize})`
+                : "Ajouter au panier"}
         </button>
       </div>
     </article>

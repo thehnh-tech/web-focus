@@ -11,6 +11,7 @@ export type Product = {
   color?: string;
   description: string;
   featured?: boolean;
+  soldOutSizes?: string[];
   createdAt?: string;
 };
 

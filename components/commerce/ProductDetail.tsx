@@ -6,7 +6,14 @@ import { Minus, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { trackPixelEvent } from "@/lib/meta-pixel";
-import { formatColor, formatPrice, sizes } from "@/lib/products";
+import { formatColor, formatPrice } from "@/lib/products";
+import {
+  ALL_SIZES,
+  availableSizes,
+  defaultAvailableSize,
+  isProductSoldOut,
+  isSizeSoldOut
+} from "@/lib/sizes";
 import type { CartItem, Product } from "@/lib/types";
 import { Accordion } from "@/components/ui/Accordion";
 
@@ -40,8 +47,11 @@ const accordionItems = [
 
 export function ProductDetail({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const soldOut = isProductSoldOut(product);
   const [selectedImage, setSelectedImage] = useState(product.image);
-  const [selectedSize, setSelectedSize] = useState<CartItem["size"]>("M");
+  const [selectedSize, setSelectedSize] = useState<CartItem["size"]>(
+    () => defaultAvailableSize(product) ?? "M"
+  );
   const [quantity, setQuantity] = useState(1);
   const [buttonText, setButtonText] = useState("Ajouter au panier");
 
@@ -61,6 +71,10 @@ export function ProductDetail({ product }: { product: Product }) {
   }, [product.id, product.name, product.price]);
 
   function handleAddToCart() {
+    if (soldOut || isSizeSoldOut(product, selectedSize)) {
+      return;
+    }
+
     setButtonText("Ajout...");
     addToCart({ product, size: selectedSize, quantity });
     window.setTimeout(() => setButtonText("Ajouté"), 250);
@@ -120,18 +134,29 @@ export function ProductDetail({ product }: { product: Product }) {
         <div className="option-group">
           <div className="option-head">
             <span>Taille</span>
+            {availableSizes(product).length < ALL_SIZES.length && !soldOut ? (
+              <span className="size-soldout-note">Tailles barrées : en rupture</span>
+            ) : null}
           </div>
           <div className="size-options">
-            {sizes.map((size) => (
-              <button
-                className={selectedSize === size ? "active" : ""}
-                key={size}
-                onClick={() => setSelectedSize(size)}
-                type="button"
-              >
-                {size}
-              </button>
-            ))}
+            {ALL_SIZES.map((size) => {
+              const sizeSoldOut = isSizeSoldOut(product, size);
+              return (
+                <button
+                  aria-disabled={sizeSoldOut}
+                  aria-label={sizeSoldOut ? `Taille ${size} en rupture de stock` : `Taille ${size}`}
+                  className={
+                    sizeSoldOut ? "size-sold-out" : selectedSize === size ? "active" : ""
+                  }
+                  disabled={sizeSoldOut}
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  type="button"
+                >
+                  {size}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -156,12 +181,19 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
         </div>
 
-        <button className="buy-button" onClick={handleAddToCart} type="button">
-          {buttonText}
+        <button
+          className="buy-button"
+          disabled={soldOut}
+          onClick={handleAddToCart}
+          type="button"
+        >
+          {soldOut ? "Épuisé" : buttonText}
         </button>
-        <Link className="buy-now-button" href="/checkout" onClick={handleAddToCart}>
-          Acheter maintenant
-        </Link>
+        {soldOut ? null : (
+          <Link className="buy-now-button" href="/checkout" onClick={handleAddToCart}>
+            Acheter maintenant
+          </Link>
+        )}
 
         <Accordion items={accordionItems} />
       </div>
