@@ -2345,9 +2345,9 @@ tr:last-child td {
 .size-options button.size-sold-out::after {
   background: linear-gradient(
     to top right,
-    transparent calc(50% - 1px),
-    #d4d4d4,
-    transparent calc(50% + 1px)
+    transparent calc(50% - 1.5px),
+    #dc2626,
+    transparent calc(50% + 1.5px)
   );
   border-radius: var(--radius-sm);
   content: "";
