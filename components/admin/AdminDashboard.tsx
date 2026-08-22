@@ -33,9 +33,44 @@ type Order = {
   items: Array<{ name: string; quantity: number; size: string; price: number }>;
   subtotal: number;
   deliveryFee: number;
+  promoCode?: string | null;
+  discount?: number;
   total: number;
   status: "new" | "confirmed" | "delivered" | "cancelled";
   createdAt: string;
+};
+
+type PromoCode = {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  minSubtotal: number;
+  maxUses: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  active: boolean;
+};
+
+type PromoForm = {
+  id?: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: string;
+  minSubtotal: string;
+  maxUses: string;
+  expiresAt: string;
+  active: boolean;
+};
+
+const emptyPromoForm: PromoForm = {
+  code: "",
+  type: "percent",
+  value: "",
+  minSubtotal: "",
+  maxUses: "",
+  expiresAt: "",
+  active: true
 };
 
 const emptyForm: OfferForm = {
@@ -78,6 +113,52 @@ function productToForm(product: Product): OfferForm {
     featured: product.featured !== false,
     soldOutSizes: product.soldOutSizes ?? []
   };
+}
+
+function promoCodeToForm(promo: PromoCode): PromoForm {
+  return {
+    id: promo.id,
+    code: promo.code,
+    type: promo.type,
+    value: String(promo.value),
+    minSubtotal: promo.minSubtotal > 0 ? String(promo.minSubtotal) : "",
+    maxUses: promo.maxUses !== null ? String(promo.maxUses) : "",
+    expiresAt: promo.expiresAt ? promo.expiresAt.slice(0, 10) : "",
+    active: promo.active
+  };
+}
+
+function describePromo(promo: PromoCode) {
+  const parts = [
+    promo.type === "percent" ? `-${promo.value} %` : `-${formatPrice(promo.value)}`
+  ];
+
+  if (promo.minSubtotal > 0) {
+    parts.push(`min ${formatPrice(promo.minSubtotal)}`);
+  }
+
+  if (promo.expiresAt) {
+    const date = new Date(promo.expiresAt);
+
+    if (!Number.isNaN(date.getTime())) {
+      // L'expiration est stockée en fin de journée UTC : formater en UTC
+      // affiche le jour saisi (sinon UTC+1 décale au lendemain).
+      parts.push(
+        `expire le ${new Intl.DateTimeFormat("fr-FR", {
+          dateStyle: "medium",
+          timeZone: "UTC"
+        }).format(date)}`
+      );
+    }
+  }
+
+  parts.push(
+    promo.maxUses !== null
+      ? `${promo.usedCount}/${promo.maxUses} utilisations`
+      : `${promo.usedCount} utilisation${promo.usedCount > 1 ? "s" : ""}`
+  );
+
+  return parts.join(" · ");
 }
 
 function formatOrderDate(value: string) {
@@ -248,8 +329,14 @@ export function AdminDashboard() {
   const [savedDeliveryFee, setSavedDeliveryFee] = useState(0);
   const [deliveryFeeInput, setDeliveryFeeInput] = useState("");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
+  const [promoForm, setPromoForm] = useState<PromoForm>(emptyPromoForm);
+  const [isSavingPromo, setIsSavingPromo] = useState(false);
+  const [deletingPromoId, setDeletingPromoId] = useState<string | null>(null);
+  const [togglingPromoId, setTogglingPromoId] = useState<string | null>(null);
 
   const isEditing = Boolean(form.id);
+  const isEditingPromo = Boolean(promoForm.id);
 
   async function loadSettings() {
     try {
@@ -284,6 +371,21 @@ export function AdminDashboard() {
     }
   }
 
+  async function loadPromoCodes() {
+    try {
+      const response = await fetch("/api/promo-codes", { cache: "no-store" });
+
+      if (response.ok) {
+        const data = await response.json().catch(() => null);
+        if (Array.isArray(data?.promoCodes)) {
+          setPromoCodes(data.promoCodes);
+        }
+      }
+    } catch {
+      setError("Impossible d’actualiser les codes promo. Cliquez sur Actualiser.");
+    }
+  }
+
   async function loadData() {
     setIsRefreshing(true);
 
@@ -292,7 +394,8 @@ export function AdminDashboard() {
         fetch("/api/offers", { cache: "no-store" }),
         fetch("/api/orders", { cache: "no-store" }),
         loadCategories(),
-        loadSettings()
+        loadSettings(),
+        loadPromoCodes()
       ]);
 
       if (offersResponse.ok) {
@@ -450,6 +553,119 @@ export function AdminDashboard() {
       setError("Impossible d’enregistrer les paramètres. Vérifiez votre connexion.");
     } finally {
       setIsSavingSettings(false);
+    }
+  }
+
+  function updatePromoForm(field: keyof PromoForm, value: string | boolean) {
+    setPromoForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function handlePromoSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSavingPromo(true);
+    setMessage("");
+    setError("");
+
+    const endpoint = isEditingPromo
+      ? `/api/promo-codes/${encodeURIComponent(promoForm.id ?? "")}`
+      : "/api/promo-codes";
+    const method = isEditingPromo ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: promoForm.code,
+          type: promoForm.type,
+          value: promoForm.value,
+          minSubtotal: promoForm.minSubtotal,
+          maxUses: promoForm.maxUses,
+          expiresAt: promoForm.expiresAt,
+          active: promoForm.active
+        })
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(data?.error || "Impossible d’enregistrer le code promo.");
+        return;
+      }
+
+      setMessage(isEditingPromo ? "Code promo mis à jour." : "Code promo créé.");
+      setPromoForm(emptyPromoForm);
+      await loadPromoCodes();
+    } catch {
+      setError("Impossible d’enregistrer le code promo. Vérifiez votre connexion.");
+    } finally {
+      setIsSavingPromo(false);
+    }
+  }
+
+  async function togglePromoActive(promo: PromoCode) {
+    setMessage("");
+    setError("");
+    setTogglingPromoId(promo.id);
+
+    try {
+      const response = await fetch(`/api/promo-codes/${encodeURIComponent(promo.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: !promo.active })
+      });
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(data?.error || "Impossible de modifier le code promo.");
+        return;
+      }
+
+      setPromoCodes((current) =>
+        current.map((entry) =>
+          entry.id === promo.id ? { ...entry, active: !promo.active } : entry
+        )
+      );
+      // Garde le formulaire d'édition cohérent : sans ça, « Mettre à jour »
+      // réenverrait l'ancien statut et annulerait silencieusement le toggle.
+      setPromoForm((current) =>
+        current.id === promo.id ? { ...current, active: !promo.active } : current
+      );
+    } catch {
+      setError("Impossible de modifier le code promo.");
+    } finally {
+      setTogglingPromoId(null);
+    }
+  }
+
+  async function deletePromoCode(promo: PromoCode) {
+    const confirmed = window.confirm(`Supprimer le code promo « ${promo.code} » ?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setMessage("");
+    setError("");
+    setDeletingPromoId(promo.id);
+
+    try {
+      const response = await fetch(`/api/promo-codes/${encodeURIComponent(promo.id)}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setError(data?.error || "Impossible de supprimer le code promo.");
+        return;
+      }
+
+      setMessage("Code promo supprimé.");
+      setPromoForm((current) => (current.id === promo.id ? emptyPromoForm : current));
+      await loadPromoCodes();
+    } catch {
+      setError("Impossible de supprimer le code promo.");
+    } finally {
+      setDeletingPromoId(null);
     }
   }
 
@@ -685,6 +901,12 @@ export function AdminDashboard() {
 
                 <footer className="admin-order-footer">
                   <div>
+                    {order.promoCode ? (
+                      <span>
+                        Code promo : {order.promoCode} (-
+                        {formatPrice(Number(order.discount || 0))})
+                      </span>
+                    ) : null}
                     <span>Livraison : {formatDeliveryFee(Number(order.deliveryFee || 0))}</span>
                     <strong>Total : {formatPrice(Number(order.total || 0))}</strong>
                   </div>
@@ -735,6 +957,181 @@ export function AdminDashboard() {
         <p className="admin-category-empty">
           Frais actuels : {formatDeliveryFee(savedDeliveryFee)}
         </p>
+      </div>
+
+      <div className="admin-panel">
+        <div className="admin-section-head">
+          <div>
+            <h2>Codes promo</h2>
+            <p>Créez des codes de réduction que vos clients appliquent au checkout.</p>
+          </div>
+        </div>
+
+        <form className="admin-promo-form" onSubmit={handlePromoSubmit}>
+          <div className="admin-promo-grid">
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-code">
+                Code
+              </label>
+              <input
+                className="admin-input"
+                id="promo-code"
+                maxLength={24}
+                onChange={(event) =>
+                  updatePromoForm("code", event.target.value.toUpperCase())
+                }
+                placeholder="ex. WELCOME10"
+                required
+                value={promoForm.code}
+              />
+            </div>
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-type">
+                Type de remise
+              </label>
+              <select
+                className="admin-input"
+                id="promo-type"
+                onChange={(event) =>
+                  updatePromoForm("type", event.target.value as PromoForm["type"])
+                }
+                value={promoForm.type}
+              >
+                <option value="percent">Pourcentage (%)</option>
+                <option value="fixed">Montant fixe (DT)</option>
+              </select>
+            </div>
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-value">
+                {promoForm.type === "percent" ? "Remise (%)" : "Remise (DT)"}
+              </label>
+              <input
+                className="admin-input"
+                id="promo-value"
+                max={promoForm.type === "percent" ? 100 : undefined}
+                min="0.1"
+                onChange={(event) => updatePromoForm("value", event.target.value)}
+                placeholder={promoForm.type === "percent" ? "ex. 10" : "ex. 15"}
+                required
+                step="0.1"
+                type="number"
+                value={promoForm.value}
+              />
+            </div>
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-min">
+                Minimum d’achat (DT, optionnel)
+              </label>
+              <input
+                className="admin-input"
+                id="promo-min"
+                min="0"
+                onChange={(event) => updatePromoForm("minSubtotal", event.target.value)}
+                placeholder="ex. 100"
+                step="0.1"
+                type="number"
+                value={promoForm.minSubtotal}
+              />
+            </div>
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-max-uses">
+                Limite d’utilisations (optionnel)
+              </label>
+              <input
+                className="admin-input"
+                id="promo-max-uses"
+                min="1"
+                onChange={(event) => updatePromoForm("maxUses", event.target.value)}
+                placeholder="ex. 50"
+                step="1"
+                type="number"
+                value={promoForm.maxUses}
+              />
+            </div>
+            <div className="admin-promo-field">
+              <label className="admin-upload-label" htmlFor="promo-expires">
+                Expire le (optionnel, jour inclus)
+              </label>
+              <input
+                className="admin-input"
+                id="promo-expires"
+                onChange={(event) => updatePromoForm("expiresAt", event.target.value)}
+                type="date"
+                value={promoForm.expiresAt}
+              />
+            </div>
+            <label className="admin-checkbox">
+              <input
+                checked={promoForm.active}
+                onChange={(event) => updatePromoForm("active", event.target.checked)}
+                type="checkbox"
+              />
+              Code actif
+            </label>
+          </div>
+          <div className="admin-actions">
+            <button className="btn-secondary" disabled={isSavingPromo} type="submit">
+              {isSavingPromo
+                ? "Enregistrement..."
+                : isEditingPromo
+                  ? "Mettre à jour le code"
+                  : "Créer le code"}
+            </button>
+            {isEditingPromo ? (
+              <button
+                className="btn-secondary"
+                onClick={() => setPromoForm(emptyPromoForm)}
+                type="button"
+              >
+                Annuler
+              </button>
+            ) : null}
+          </div>
+        </form>
+
+        {promoCodes.length > 0 ? (
+          <div className="admin-category-list">
+            {promoCodes.map((promo) => (
+              <article
+                className={`admin-category-row admin-promo-row${promo.active ? "" : " inactive"}`}
+                key={promo.id}
+              >
+                <div>
+                  <strong>
+                    {promo.code}
+                    {promo.active ? "" : " (inactif)"}
+                  </strong>
+                  <span>{describePromo(promo)}</span>
+                </div>
+                <button
+                  disabled={togglingPromoId === promo.id}
+                  onClick={() => togglePromoActive(promo)}
+                  type="button"
+                >
+                  {togglingPromoId === promo.id
+                    ? "..."
+                    : promo.active
+                      ? "Désactiver"
+                      : "Activer"}
+                </button>
+                <button onClick={() => setPromoForm(promoCodeToForm(promo))} type="button">
+                  Modifier
+                </button>
+                <button
+                  disabled={deletingPromoId === promo.id}
+                  onClick={() => deletePromoCode(promo)}
+                  type="button"
+                >
+                  {deletingPromoId === promo.id ? "Suppression..." : "Supprimer"}
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="admin-category-empty">
+            Aucun code promo pour le moment. Créez-en un avec le formulaire.
+          </p>
+        )}
       </div>
 
       <div className="admin-panel">

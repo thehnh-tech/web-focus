@@ -34,3 +34,10 @@ export type CartItem = {
 };
 
 export type OrderStatus = "new" | "confirmed" | "delivered" | "cancelled";
+
+export type AppliedPromo = {
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  minSubtotal: number;
+};

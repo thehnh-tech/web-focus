@@ -34,6 +34,20 @@ const offerSchema = new Schema(
   { timestamps: true }
 );
 
+const promoCodeSchema = new Schema(
+  {
+    code: { type: String, required: true, unique: true, trim: true, uppercase: true },
+    type: { type: String, enum: ["percent", "fixed"], required: true },
+    value: { type: Number, required: true, min: 0 },
+    minSubtotal: { type: Number, default: 0, min: 0 },
+    maxUses: { type: Number, default: null, min: 1 },
+    usedCount: { type: Number, default: 0, min: 0 },
+    expiresAt: { type: Date, default: null },
+    active: { type: Boolean, default: true }
+  },
+  { timestamps: true }
+);
+
 const orderItemSchema = new Schema(
   {
     productId: { type: String, required: true },
@@ -58,6 +72,8 @@ const orderSchema = new Schema(
     items: { type: [orderItemSchema], default: [] },
     subtotal: { type: Number, required: true },
     deliveryFee: { type: Number, required: true, default: 0 },
+    promoCode: { type: String, trim: true, uppercase: true, default: null },
+    discount: { type: Number, default: 0, min: 0 },
     total: { type: Number, required: true },
     paymentMethod: { type: String, default: "Paiement à la livraison" },
     status: {
@@ -81,6 +97,11 @@ export type OfferDocument = InferSchemaType<typeof offerSchema> & {
   _id: mongoose.Types.ObjectId;
 };
 
+export type PromoCodeDocument = InferSchemaType<typeof promoCodeSchema> & {
+  _id: mongoose.Types.ObjectId;
+  createdAt: Date;
+};
+
 export type OrderDocument = InferSchemaType<typeof orderSchema> & {
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -97,6 +118,10 @@ export const CategoryModel =
 export const OfferModel =
   (mongoose.models.Offer as Model<OfferDocument>) ||
   mongoose.model<OfferDocument>("Offer", offerSchema);
+
+export const PromoCodeModel =
+  (mongoose.models.PromoCode as Model<PromoCodeDocument>) ||
+  mongoose.model<PromoCodeDocument>("PromoCode", promoCodeSchema);
 
 export const OrderModel =
   (mongoose.models.Order as Model<OrderDocument>) ||

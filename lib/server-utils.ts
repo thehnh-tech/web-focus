@@ -1,6 +1,13 @@
 import type { Category, Product } from "@/lib/types";
 import { CategoryModel, OfferModel, SettingsModel } from "@/lib/models";
 import { governorates, orderSizes } from "@/lib/products";
+import {
+  PROMO_CODE_PATTERN,
+  checkPromoUsable,
+  findPromoCode,
+  normalizePromoCode,
+  roundMoney
+} from "@/lib/promo";
 import { isSizeSoldOut, sanitizeSoldOutSizes } from "@/lib/sizes";
 
 const objectIdPattern = /^[a-f\d]{24}$/i;
@@ -329,7 +336,39 @@ export async function validateOrderPayload(body: Record<string, unknown>) {
     return { error: resolved.error };
   }
 
-  const subtotal = resolved.items.reduce((total, item) => total + item.price * item.quantity, 0);
+  // Arrondi au dixième (granularité des prix) : sans lui, 3 × 33.3 donne
+  // 99.899999… et échouerait un minimum d'achat de 99.9 pourtant affiché atteint.
+  const subtotal = roundMoney(
+    resolved.items.reduce((total, item) => total + item.price * item.quantity, 0)
+  );
+
+  // La remise est recalculée côté serveur à partir du code seul : le montant
+  // envoyé par le client n'est jamais utilisé.
+  const promoCodeInput = normalizePromoCode(body.promoCode);
+  let promoCode: string | null = null;
+  let discount = 0;
+
+  if (promoCodeInput) {
+    if (!PROMO_CODE_PATTERN.test(promoCodeInput)) {
+      return { error: "Code promo invalide." };
+    }
+
+    const promo = await findPromoCode(promoCodeInput);
+
+    if (!promo) {
+      return { error: "Ce code promo n’existe pas." };
+    }
+
+    const check = checkPromoUsable(promo, subtotal);
+
+    if (!check.ok) {
+      return { error: check.error };
+    }
+
+    promoCode = promoCodeInput;
+    discount = check.discount;
+  }
+
   const deliveryFee = await getDeliveryFee();
 
   return {
@@ -343,7 +382,9 @@ export async function validateOrderPayload(body: Record<string, unknown>) {
       items: resolved.items,
       subtotal,
       deliveryFee,
-      total: subtotal + deliveryFee,
+      promoCode,
+      discount,
+      total: roundMoney(subtotal - discount + deliveryFee),
       paymentMethod: "Paiement à la livraison"
     }
   };

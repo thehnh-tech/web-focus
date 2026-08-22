@@ -1417,6 +1417,95 @@ button:disabled {
   color: var(--muted-foreground);
 }
 
+.order-summary .promo-block {
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+  /* Neutralise le space-between hérité de .order-summary div, sinon la
+     colonne unique de la grille ne s'étire pas sur toute la largeur. */
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: normal;
+  padding: 4px 0 16px;
+}
+
+.promo-field {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.promo-field input {
+  background: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+  min-height: 48px;
+  min-width: 0;
+  padding: 0 14px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.promo-field input::placeholder {
+  text-transform: none;
+}
+
+.promo-field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.08);
+  outline: none;
+}
+
+.promo-field button {
+  background: transparent;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  min-height: 48px;
+  padding: 0 18px;
+  text-transform: uppercase;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+.promo-field button:hover:not(:disabled) {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.promo-field button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.order-summary .promo-applied {
+  padding: 0;
+}
+
+.promo-remove {
+  background: transparent;
+  border: 0;
+  color: var(--destructive);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-transform: uppercase;
+}
+
+.order-summary .promo-block .form-error {
+  /* .order-summary p (plus spécifique que .form-error) grise le texte :
+     on réimpose la couleur d'erreur. */
+  color: var(--destructive);
+  margin: 0;
+}
+
+.order-summary .summary-discount strong {
+  color: var(--price-sale);
+}
+
 .content-page.narrow {
   max-width: 900px;
 }
@@ -2224,6 +2313,39 @@ tr:last-child td {
   font-size: 14px;
 }
 
+.admin-promo-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-promo-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-promo-field {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-promo-grid .admin-checkbox {
+  align-self: end;
+}
+
+.admin-promo-row {
+  grid-template-columns: 1fr auto auto auto;
+}
+
+.admin-promo-row.inactive {
+  background: var(--secondary);
+}
+
+.admin-promo-row.inactive strong {
+  color: var(--muted-foreground);
+}
+
 .product-card-skeleton {
   animation: skeleton-pulse 1.4s ease-in-out infinite;
   background: var(--secondary);
@@ -2246,7 +2368,12 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  .admin-category-row {
+  .admin-category-row,
+  .admin-promo-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-promo-grid {
     grid-template-columns: 1fr;
   }
 

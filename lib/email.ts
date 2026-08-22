@@ -19,6 +19,8 @@ type OrderEmailInput = {
   items: OrderEmailItem[];
   subtotal: number;
   deliveryFee: number;
+  promoCode?: string;
+  discount?: number;
   total: number;
   paymentMethod?: string;
   createdAt?: Date | string;
@@ -106,7 +108,14 @@ function buildOrderEmail(order: OrderEmailInput) {
       </table>
 
       <div style="padding:18px;background:#f5f5f5;border-radius:8px;">
-        <p style="margin:0;">Sous-total : <strong>${formatPrice(order.subtotal)}</strong></p>
+        <p style="margin:0;">Sous-total : <strong>${formatPrice(order.subtotal)}</strong></p>${
+          order.discount && order.discount > 0
+            ? `
+        <p style="margin:0;">Remise${
+          order.promoCode ? ` (${escapeHtml(order.promoCode)})` : ""
+        } : <strong>-${formatPrice(order.discount)}</strong></p>`
+            : ""
+        }
         <p style="margin:0;">Livraison : <strong>${formatDeliveryFee(order.deliveryFee)}</strong></p>
         <p style="margin:8px 0 0;font-size:18px;">Total : <strong>${formatPrice(order.total)}</strong></p>
       </div>
