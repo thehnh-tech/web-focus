@@ -1,5 +1,9 @@
 # FocusGym Commerce
 
+Website, product catalogue and administration tools for the FocusGym compression-wear brand, built with Next.js.
+
+The repository name `web-focus` refers to **FocusGym commerce**. This is a separate project from the focus and study applications in the organisation.
+
 Next.js e-commerce front-end and admin/backend for the FocusGym compression wear brand.
 
 ## Local setup
